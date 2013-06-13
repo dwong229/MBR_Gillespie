@@ -3,8 +3,9 @@ clear
 close all
 %%%%%%%%
 simMode = 5; %1: one simulation, 2: repetition
+% 6: repetition of 4 
 %%%%%%%%
-repeatSim = 1000;
+repeatSim = 100;
 simIterations = 1000;
 
 %% simulation parameters
@@ -227,11 +228,63 @@ switch simMode
         axis([0,ceil(timeVec(end)),0,360])
         
         figure
-        plot(x,y)        
+        plot(x,y)    
         
+        [rtRatio,dtheta,dx] = eval_MBR_gillespie(timeVec,state,simTime)
         % make a movie to simulate mbr state:
         MBRmovie(timeVec,state)
         
+    case 6
+        disp('Running Repetition of MBR Simulation')
+        
+        t = CTimeleft(repeatSim);
+        attractant = @(x) 0;
+        
+        for rep = 1:repeatSim
+            t.timeleft();
+            plotnow = false;
+            
+            % run simulation
+            init = [I A AA AAp YY YYp Mot Run];
+            [timeVec,state] =  MBR_gillespie_func(rxnrate,init,simIterations,attractant);
+        
+            % compute stats
+            if rep == 1
+                simTime = floor(timeVec(end)*0.75);
+            end
+            
+            [rtRatio,dtheta,dx] = eval_MBR_gillespie(timeVec,state,simTime);
+            
+            stats.dx(rep,:) = dx;
+            stats.dtheta(rep) = dtheta;
+            stats.rtratio(rep,:) = rtRatio;
+        end
+            %plots
+            figure
+            hist(stats.rtratio(:),[0:2:100])
+            axis([0 100 0 150])
+            title('Histogram of run/tumble ratio')
+            xlabel('run/tumble ratio')
+            ylabel('frequency')
+            
+            figure
+            for i = 1:size(stats.dx,1)
+                hold on
+                line([0 stats.dx(i,1)],[0 stats.dx(i,2)])
+            end
+            title('Random Walk Planar Displacement')
+            xlabel('x (um)')
+            ylabel('y (um)')
+            
+            avgrtratio = mean(stats.rtratio(:));
+            stdrtratio = std(stats.rtratio(:));
+            fprintf('Mean run-tumble ratio: %4.4f, stdev: %4.4f \n',avgrtratio,stdrtratio)
+            
+            avgdx = mean(stats.dx,1);
+            stddx = std(stats.dx,1);
+            fprintf('Mean displacement ratio: (%4.0f,%4.0f), stdev: (%4.0f,%4.0f) \n',avgdx(1),avgdx(2),stddx(1),stddx(2))
+
+               
         
     otherwise
         disp('Invalid simMode')

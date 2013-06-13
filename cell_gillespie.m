@@ -1,6 +1,10 @@
-function [tau,newcellchem,dth] = cell_gillespie(timeVec,rxn_rates,state)
+function [tau,newcellchem,dth] = cell_gillespie(timeVec,rxn_rates,state,varargin)
+
 
 dth = 0;
+if ~isempty(varargin)
+    varInput = char(varargin);
+end
 
 % unpack rxn
 phi = rxn_rates(1);  % I -> A
@@ -71,8 +75,14 @@ end
 %fprintf('Reaction: %3.0f \n',nextRxn)
 
 % Update state
-newcellchem = state + stateChange(nextRxn,:);
+if isequal('MBR',varInput)
+    newcellchem = nextRxn;
+else
+    newcellchem = state + stateChange(nextRxn,:);
+end
 
+%%%%%%%%%%%%%%Tumble reorient%%%%%%%%%%%%
+if false
 % set run state to always be at most 1:
 if newcellchem(8) >0
     newcellchem(8) = 1;
@@ -83,9 +93,8 @@ elseif newcellchem(8)==0
         dth = normrnd(58,20)*(1);
     end
 end
-
-%state(i,:)
-
+end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % compute time to event
 tau = rxnScale * log(1/r(2));
 

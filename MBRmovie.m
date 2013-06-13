@@ -40,9 +40,9 @@ function [] = MBRmovie(timeVec, state)
     
     bacHead = rotationMatrix * state.cellposn(:,1:2)';
     bacHead = bacHead';
-    cellAngle = state.cellAngle;
+    cellAngle = state.cellAngle + repmat(th,[1,4]); % in world frame
     dbac = 10*[cosd(cellAngle(1,:))' sind(cellAngle(1,:))'];
-    bacTail = bacHead + dbac;
+    bacTail = bacHead - dbac;
         
     % plot cells
     for j = 1:size(state.cellposn,1)
@@ -65,7 +65,7 @@ function [] = MBRmovie(timeVec, state)
     frame = getframe(gcf);
     open(mbrViewObj)
     writeVideo(mbrViewObj,frame);
-%     close(mbrViewObj)
+    % close(mbrViewObj)
     
     for i = 2:length(timeVec)
         % update time vector
@@ -85,10 +85,9 @@ function [] = MBRmovie(timeVec, state)
         bacHead = rotationMatrix * state.cellposn(:,1:2)';
         bacHead = bacHead' + repmat([x(i),y(i)],[4,1]);
         
-        cellAngle = state.cellAngle(i,:);
-        dbac = 10*[cosd(cellAngle)' sind(cellAngle)'];
+        dbac = 10*[cosd(cellAngle(i,:))' sind(cellAngle(i,:))'];
         
-        bacTail = bacHead + dbac;
+        bacTail = bacHead - dbac;
         
         % plot cells
         for j = 1:size(state.cellposn,1)
@@ -123,4 +122,3 @@ function [] = MBRmovie(timeVec, state)
         end
         
     end
-    
