@@ -6,7 +6,7 @@ simMode = 5; %1: one simulation, 2: repetition
 % 6: repetition of 4 
 %%%%%%%%
 repeatSim = 100;
-simIterations = 1000;
+simIterations = 100;
 
 %% simulation parameters
 delta = 0; % A -> I   reduced ligand detected

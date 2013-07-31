@@ -11,7 +11,6 @@ EcoliSimMain.m : main function to run simulation.  Relies on all other functions
 
 - SUBFUNCTIONS -
 ----- Gillespie functions:
-
 ecoli_gillespie_func.m : Gillespie simulation of reactions for e.coli
 cell_gillespie.m : Same equations a in ecoli_gillespie_func.m but with different inputs and outputs suitable for MBR case.
 MBR_gillespie_func.m : keeps track of state of MBR, calls a gillespie function within to compute which bacterium has a reaction.
