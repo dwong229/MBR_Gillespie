@@ -46,6 +46,37 @@ end
 % initial chem state:
 cellstate = repmat(init,[1,1,numcell]); %cellstate(timeidx,chem,cell)
 
+
+% trouble shooting dxdt_f, dydt_f, dadt_f, dxdt, dydt, dadt
+troubleshoot = true;
+if troubleshoot
+    disp('Troubleshoot = True')
+    figure;
+    dxdt_fvec = 0;
+    dydt_fvec = 0;
+    dadt_fvec = 0;
+    
+    dxdtvec = 0;
+    dydtvec = 0;
+    dadtvec = 0;
+        
+    subplot(2,1,1)
+    hforcexf = plot([1],[0],'xb');
+    hold on
+    hforcexw = plot(1,0,'ob');
+    hforceyf = plot(1,0,'xr');
+    hforceyf = plot(1,0,'or');
+    xlabel('FrameNumber')
+    ylabel('Force')
+    subplot(2,1,2)
+    hforcea = plot(1,0,'xk');
+    xlabel('FrameNumber')
+    ylabel('Angular Velocity')
+    
+end
+    
+MBRstate.cellAngle(1,:) = MBRstate.cellposn(:,3)';
+
 for i = 2:simIterations
     % determine next reaction from nextRxnTime
     
@@ -64,24 +95,46 @@ for i = 2:simIterations
     
     %update MBR state
     % viscosity constants
-    kt = 1; % p/kt
+    kt = 2; % p/kt
     kr = 1;
     
     bx = MBRstate.cellposn(:,1);
     by = MBRstate.cellposn(:,2);
     th = MBRstate.cellposn(:,3);
+    %thunwrap = rad2deg(unwrap(deg2rad(th)));
+    %th = thunwrap;
     
     Fnow = MBRstate.F(i-1,:)';
     
     dxdt_f = kt*sum(Fnow.*cosd(th)); %mbr frame
     dydt_f = kt*sum(Fnow.*sind(th)); %mbr frame
     numtumblecells = sum(Fnow==0);
-    dadt_f = kr*sum(bx.*Fnow.*sind(th) + by.*Fnow.*cosd(th)) + tumbleconstant*numtumblecells;
+
+    dadt_f = kr*sum(bx.*Fnow.*sind(th) + by.*Fnow.*cosd(th)) - tumbleconstant*numtumblecells;
     
     dxdt = (dxdt_f)*cosd(MBRstate.posn(i-1,3)) - dydt_f*sind(MBRstate.posn(i-1,3));
     dydt = (dxdt_f)*sind(MBRstate.posn(i-1,3)) + dydt_f*cosd(MBRstate.posn(i-1,3));
     dadt = dadt_f;
     
+    if troubleshoot
+        % update velocity vectors
+        dxdt_fvec = [dxdt_fvec dxdt_f];
+        dydt_fvec = [dydt_fvec dydt_f];
+        dadt_fvec = [dadt_fvec dadt_f];
+        
+        dxdtvec = [dxdtvec dxdt];
+        dydtvec = [dydtvec dxdt];
+        
+        frame = 1:i;
+        % update figure handles
+        set(hforcexf,'XData',frame,'YData',dxdt_fvec);
+        set(hforceyf,'XData',frame,'YData',dydt_fvec);
+        set(hforcexf,'XData',frame,'YData',dxdt_fvec);
+        set(hforceyf,'XData',frame,'YData',dydt_fvec);
+        set(hforcea,'XData',frame,'YData',dadt_fvec);
+    
+    end
+            
     % update position of MBR
     dt = timeVec(i) - timeVec(i-1);
     MBRstate.posn(i,:) = MBRstate.posn(i-1,:) + dt*[dxdt dydt dadt];

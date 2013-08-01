@@ -1,0 +1,146 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 1. Presentation header file (in separate file)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[t]{beamer}
+%\input{texfile} % replace texfile with main content file name
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 2. Handout header file (in separate file)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\documentclass[handout, t]{beamer}
+%\input{texfile} % replace texfile with main content file name
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 3. Main content preamble and opening slides
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\mode<beamer>{
+\usetheme{Frankfurt}
+\setbeamertemplate{navigation symbols}{}
+}
+\mode<handout>{
+\usepackage{pgfpages}
+\pgfpagesuselayout{4 on 1}[a4paper, border shrink=10mm, landscape]
+\usetheme{default}
+}
+
+\title{}
+\subtitle{}
+\author{}
+\institute{}
+\date{}
+
+\begin{document}
+\mode*
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+\frametitle{Outline}
+\tableofcontents
+\end{frame}
+
+
+\end{document}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 4. Templates for individual slide types
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Slide at the beginning of a section
+\begin{frame}{Outline}
+\tableofcontents[currentsection]
+\end{frame}
+
+
+% Simple slide
+\begin{frame}{}
+\begin{itemize}
+\item
+\end{itemize}
+\end{frame}
+
+
+% Slide with a block
+\begin{frame}{}
+\begin{block}{}
+\begin{itemize}
+\item
+\end{itemize}
+\end{block}
+\end{frame}
+
+
+% Slide with example (different colour to Block)
+\begin{frame}{}
+\begin{example}
+\begin{itemize}
+\item
+\end{itemize}
+\end{example}
+\end{frame}
+
+
+% Slide with two columns
+% (0.5 can be adjusted but should generally sum to 1.0)
+\begin{frame}{}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\end{column}
+\begin{column}{0.5\textwidth}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+% Verbatim
+\begin{frame}[fragile]{}
+\begin{verbatim}
+% code
+\end{verbatim}
+\end{frame}
+
+% slide with title and figure
+\begin{frame}{}
+\begin{center}
+\includegraphics[width=11cm]{files/figure}
+%\caption
+\end{center}
+\end{frame}
+
+
+% Full screen image
+\mode<all>
+{\usebackgroundtemplate{\includegraphics[width=\paperwidth]
+{files/figure}} %replace files/figure with file path and name
+\begin{frame}[plain]
+\end{frame}}
+\mode<all>{\usebackgroundtemplate{}}
+\mode*
+
+
+% Basic centred table with alternating colour rows
+% \usepackage{xcolor}
+% \documentclass[xcolor=pdftex,dvipsnames, table]{beamer}
+% adapted from http://www.tug.org/TUGboat/Articles/tb26-1/mertz.pdf
+\begin{frame}{}
+\begin{center}
+\rowcolors{1}{\RoyalBlue!20}{\RoyalBlue!5}
+\begin{tabular}{lll}\hline
+A & B & C \\
+\end{tabular}
+\end{center}
+\end{frame}
+
+
+% Frame with incrementally displayed dot points with an alert
+\begin{frame}{}
+\begin{itemize}[<+-| alert@+>]
+\item
+\end{itemize}
+\end{frame}

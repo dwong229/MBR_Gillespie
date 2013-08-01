@@ -6,7 +6,8 @@ simMode = 5; %1: one simulation, 2: repetition
 % 6: repetition of 4 
 %%%%%%%%
 repeatSim = 100;
-simIterations = 100;
+
+simIterations = 500;
 
 %% simulation parameters
 delta = 0; % A -> I   reduced ligand detected
@@ -226,6 +227,9 @@ switch simMode
         xlabel('Time (s)')
         ylabel('Orientation (deg')
         axis([0,ceil(timeVec(end)),0,360])
+        
+        % save figure for position and orientation
+        print(gcf,'-djpeg','posOrientationSim1.jpg')
         
         figure
         plot(x,y)    

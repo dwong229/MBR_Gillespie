@@ -3,10 +3,15 @@
 
 function [] = MBRmovie(timeVec, state)
     
+    % video options
+    timestep = 1/30;% 30fps
+    
     % unpack state
     x = state.posn(:,1);
     y = state.posn(:,2);
     th = state.posn(:,3);
+    thunwrap = rad2deg(unwrap(deg2rad(th)));
+    th = thunwrap;
        
     xLimits = [min(x) max(x)];
     xLimits = round(xLimits/10)*10;
@@ -60,32 +65,47 @@ function [] = MBRmovie(timeVec, state)
     ylabel('Y-coordinate')
     title('Gillespie Simulation of MBR')
     
-    
     % save frame to video
     frame = getframe(gcf);
     open(mbrViewObj)
     writeVideo(mbrViewObj,frame);
     % close(mbrViewObj)
     
-    for i = 2:length(timeVec)
-        % update time vector
-        set(htime,'string',sprintf('Time = %.2f s',timeVec(i)))
+    %for i = 2:length(timeVec)
+    i = 1;
+    timeCurrent = 0;
+    while timeCurrent + timestep < timeVec(end)
+        % update timeCurrent
+        timeCurrent = timeCurrent + timestep;
         
-        cornerTh = [45:90:360]'+th(i);       
+        % update the index i
+        i = find(timeVec<timeCurrent,1,'last');
+
+        % update time vector
+        set(htime,'string',sprintf('Time = %.2f s',timeCurrent))
+        
+        % compute angle of MBR
+        thRate = (th(i+1) - th(i))/(timeVec(i+1)-timeVec(i));
+        thNow = th(i) + thRate*(timeCurrent-timeVec(i));
+        
+        cornerTh = [45:90:360]'+ thNow;       
         % update MBR position
-        mbrCorners = diagl*[cosd(cornerTh) sind(cornerTh)] + repmat([x(i),y(i)],[4,1]);
+        vel = [diff([x(i),x(i+1)]);diff([y(i),y(i+1)])]/(timeVec(i+1) - timeVec(i));
+        xNow = x(i) + vel(1)*(timeCurrent - timeVec(i));
+        yNow = y(i) + vel(2)*(timeCurrent - timeVec(i));
+        
+        mbrCorners = diagl*[cosd(cornerTh) sind(cornerTh)] + repmat([xNow,yNow],[4,1]);
         mbrCorners = [mbrCorners;mbrCorners(1,:)];
         
         set(mbrsq,'XData',mbrCorners(:,1),'YData',mbrCorners(:,2));
                 
-        
-        
-        rotationMatrix = [cosd(th(i)) -sind(th(i));sind(th(i)) cosd(th(i))];
+        rotationMatrix = [cosd(thNow) -sind(thNow);sind(thNow) cosd(thNow)];
         
         bacHead = rotationMatrix * state.cellposn(:,1:2)';
-        bacHead = bacHead' + repmat([x(i),y(i)],[4,1]);
+        bacHead = bacHead' + repmat([xNow,yNow],[4,1]);
         
-        dbac = 10*[cosd(cellAngle(i,:))' sind(cellAngle(i,:))'];
+        dbac = 10*[cosd(cellAngle(i,:)+thRate*(timeCurrent-timeVec(i)))' sind(cellAngle(i,:)+thRate*(timeCurrent-timeVec(i)))'];
+
         
         bacTail = bacHead - dbac;
         
