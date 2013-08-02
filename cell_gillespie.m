@@ -69,6 +69,14 @@ else
     %disp('1 rxn possible only')
     nextRxn = find(rxnProb == 1,true,'first');
 end
+
+%%%%%%%Always Tumble (blue light)%%%%%%%
+%if true
+%    nextRxn = 7;
+% DOES NOT WORK
+%end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %fprintf('rand(1): %3.3f\n',r(1))
 %rxnProb
 %rxnBin
@@ -76,8 +84,10 @@ end
 
 % Update state
 if isequal('MBR',varInput)
+    % update state for MBR mode (save rxn only)
     newcellchem = nextRxn;
-else
+else 
+    % update state for cell
     newcellchem = state + stateChange(nextRxn,:);
 end
 
@@ -97,4 +107,3 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % compute time to event
 tau = rxnScale * log(1/r(2));
-

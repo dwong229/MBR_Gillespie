@@ -12,6 +12,7 @@ function [] = MBRmovie(timeVec, state)
     th = state.posn(:,3);
     thunwrap = rad2deg(unwrap(deg2rad(th)));
     th = thunwrap;
+    numcell = size([state.cellposn],1);
        
     xLimits = [min(x) max(x)];
     xLimits = round(xLimits/10)*10;
@@ -45,7 +46,7 @@ function [] = MBRmovie(timeVec, state)
     
     bacHead = rotationMatrix * state.cellposn(:,1:2)';
     bacHead = bacHead';
-    cellAngle = state.cellAngle + repmat(th,[1,4]); % in world frame
+    cellAngle = state.cellAngle + repmat(th,[1,numcell]); % in world frame
     dbac = 10*[cosd(cellAngle(1,:))' sind(cellAngle(1,:))'];
     bacTail = bacHead - dbac;
         
@@ -102,7 +103,7 @@ function [] = MBRmovie(timeVec, state)
         rotationMatrix = [cosd(thNow) -sind(thNow);sind(thNow) cosd(thNow)];
         
         bacHead = rotationMatrix * state.cellposn(:,1:2)';
-        bacHead = bacHead' + repmat([xNow,yNow],[4,1]);
+        bacHead = bacHead' + repmat([xNow,yNow],[numcell,1]);
         
         dbac = 10*[cosd(cellAngle(i,:)+thRate*(timeCurrent-timeVec(i)))' sind(cellAngle(i,:)+thRate*(timeCurrent-timeVec(i)))'];
 

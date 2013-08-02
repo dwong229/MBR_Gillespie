@@ -18,8 +18,11 @@ tumbleconstant = 0; % CCW>0, CW<0
 %Tumble constant should be positive, so that it exerts CCW torque on MBR
 
 %Initiate cells on MBR
-MBRstate = struct('posn',[0 0 360*rand(1)],'cellposn',[],'F',ones(1,4)); %in fixed/world frame
-numcell = 4;
+numcell = 30;
+MBRstate = struct('posn',[0 0 360*rand(1)],'cellposn',[],'F',ones(1,numcell)); %in fixed/world frame
+
+% initial chem state:
+cellstate = repmat(init,[1,1,numcell]); %cellstate(timeidx,chem,cell)
 
 %initialize variables
 timeVec(1) = 0;
@@ -27,27 +30,68 @@ rxncell(1) = 0;
 % matrix storing the time of next rxn in row 1 and rxn number in row 2
 nextRxnTime = zeros(2,numcell);
 
-
 % MBR geometry:sq of sizes 40:
 %place cells at center of each edge
-MBRstate.cellposn(1:numcell,1:2) = [20,0;0,-20;-20,0;0,20]; %in MBR frame
+%MBRstate.cellposn(1:numcell,1:2) = [20,0;0,-20;-20,0;0,20]; %in MBR frame
+MBRstate.cellposn(1:numcell,1:2) = [rand(numcell,2)*40-20]; %in MBR frame
 MBRstate.cellposn(1:numcell,3) = [360*rand(numcell,1)];
 %MBRstate.cellposn(1:4,3) = [0 -90 -180 -270];
-MBRstate.cellposn(1:numcell,3) = [zeros(1,numcell)];
-    
-% generate a time and rxn for each cell
+%MBRstate.cellposn(1:numcell,3) = [zeros(1,numcell)];
+
+%% Determine if the bacterium hangs over the edge of microstructure
+%(for adding edge force)
+celllength = 10; %um
+edgecell = zeros(1,numcell); % store 1 if edge bacterium 
+
+% compute location of flagellum
+cellangle = MBRstate.cellposn(:,3);
+dbac = celllength*[cosd(cellangle) sind(cellangle)];
+
+bacHead = MBRstate.cellposn(:,1:2); 
+bacTail = bacHead - dbac;
+
+edgecell = max(abs(bacTail),[],2)>20; % setup for 40x40 sq mbr
+
+%% test correct edge detection
+if true
+flagella1 = figure;
+plot([-20 -20 20 20 -20],[-20 20 20 -20 -20],'-k')
+for cell = 1:numcell
+    % determine if it is in the MBR
+    hold on
+    bacX = [bacHead(cell,1);bacTail(cell,1)];
+    bacY = [bacHead(cell,2);bacTail(cell,2)];
+    hold on
+    if edgecell(cell)
+       % OVER EDGE IN RED
+        cellplot(cell) = plot(bacX,bacY,'-r','LineWidth',5);
+    else
+       cellplot(cell) = plot(bacX,bacY,'-b','LineWidth',5);
+    end
+end
+axis equal
+
+th = MBRstate.cellposn(:,3);
+dxNormal = cosd(th);
+dyNormal = sind(th);
+quiver(MBRstate.cellposn(1:numcell,1), MBRstate.cellposn(1:numcell,2),dxNormal,dyNormal);
+
+thTangent = edgecell.* MBRstate.cellposn(:,3);
+dxTangent = -sind(thTangent);
+dyTangent = cosd(thTangent);
+quiver(MBRstate.cellposn(edgecell==1,1), MBRstate.cellposn(edgecell==1,2),dxTangent(edgecell==1),dyTangent(edgecell==1));
+keyboard
+end
+
+%% generate a time and rxn for each cell
 for j = 1:numcell
     %determine what reaction occurs and return new state and change in cell
     %angle and tau time
     [tau,newcellchem,~] = cell_gillespie(timeVec,rxnrate,init,'MBR');
-    nextRxnTime(:,j) = [tau;newcellchem];    
+    nextRxnTime(:,j) = [tau;newcellchem];
 end
 
-% initial chem state:
-cellstate = repmat(init,[1,1,numcell]); %cellstate(timeidx,chem,cell)
-
-
-% trouble shooting dxdt_f, dydt_f, dadt_f, dxdt, dydt, dadt
+%% trouble shooting dxdt_f, dydt_f, dadt_f, dxdt, dydt, dadt
 troubleshoot = true;
 if troubleshoot
     disp('Troubleshoot = True')
@@ -77,6 +121,7 @@ end
     
 MBRstate.cellAngle(1,:) = MBRstate.cellposn(:,3)';
 
+%% cycle through reactions to determine dynamics
 for i = 2:simIterations
     % determine next reaction from nextRxnTime
     
@@ -95,8 +140,10 @@ for i = 2:simIterations
     
     %update MBR state
     % viscosity constants
-    kt = 2; % p/kt
+    kt = 1; % p/kt
     kr = 1;
+    p = 0.41; %pN from lit 
+    q = 1.5e-6;  %pN from ASME IDETC 2012
     
     bx = MBRstate.cellposn(:,1);
     by = MBRstate.cellposn(:,2);
@@ -106,16 +153,24 @@ for i = 2:simIterations
     
     Fnow = MBRstate.F(i-1,:)';
     
-    dxdt_f = kt*sum(Fnow.*cosd(th)); %mbr frame
-    dydt_f = kt*sum(Fnow.*sind(th)); %mbr frame
-    numtumblecells = sum(Fnow==0);
-
-    dadt_f = kr*sum(bx.*Fnow.*sind(th) + by.*Fnow.*cosd(th)) - tumbleconstant*numtumblecells;
+    %% Force Calc -> dynamics
+    % no side force
+    %dxdt_f = kt*sum(Fnow.*cosd(th)) ; %mbr frame
+    %dydt_f = kt*sum(Fnow.*sind(th)); %mbr frame
+    %numtumblecells = sum(Fnow==0);   
+    %dadt_f = kr*sum(bx.*Fnow.*sind(th) + by.*Fnow.*cosd(th)) - tumbleconstant*numtumblecells;
+    
+    % with side force
+    dxdt_f = 1/kt*(p*sum(Fnow.*cosd(th)) - q*sum(Fnow.*edgecell.*sind(th))); %mbr frame
+    dydt_f = 1/kt*(p*sum(Fnow.*sind(th)) + q*sum(Fnow.*edgecell.*cosd(th))); %mbr frame
+    
+    numtumblecells = sum(Fnow==0);   
+    dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p + by.*Fnow.*cosd(th)*p + bx.*Fnow.*cosd(th)*q - by.*Fnow.*sin(th)*q)) + tumbleconstant*numtumblecells;
     
     dxdt = (dxdt_f)*cosd(MBRstate.posn(i-1,3)) - dydt_f*sind(MBRstate.posn(i-1,3));
     dydt = (dxdt_f)*sind(MBRstate.posn(i-1,3)) + dydt_f*cosd(MBRstate.posn(i-1,3));
     dadt = dadt_f;
-    
+        
     if troubleshoot
         % update velocity vectors
         dxdt_fvec = [dxdt_fvec dxdt_f];
