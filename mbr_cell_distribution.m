@@ -14,6 +14,9 @@
 %
 % VARARGINS: 
 % CELLLENGTH: length of cell in um.  Default cell length 5um.
+%
+% OUTPUT:
+% dist: 
 
 % divide MBR into rectangles based on corners
 
@@ -43,11 +46,19 @@ end
 
 i = 0;
 while i < numcell
-    % randomly place a cell
-    posnTemp = rand(1,3).*[40,40,360] - [20,20,0];
+    intersect = 1;
+        while intersect  
+            % randomly place a cell
+            posnTemp = rand(1,3).*[40,40,360] - [20,20,0];
     
-    % check for intersections
-    
+            % check for intersections
+            intersect = check_line_intersection(posnTemp,dist,celllength);
+            if intersect == 1
+                disp('Regenerate')
+                keyboard
+            end
+        end
+        
     
     % store cell data
     dist(i+1,:) = posnTemp;
@@ -82,7 +93,7 @@ for cell = 1:numcell
     hold on
     if edgecell(cell)
        % OVER EDGE IN RED
-        cellplot(cell) = plot(bacX,bacY,'-r','LineWidth',5);
+       cellplot(cell) = plot(bacX,bacY,'-r','LineWidth',5);
     else
        cellplot(cell) = plot(bacX,bacY,'-b','LineWidth',5);
     end
