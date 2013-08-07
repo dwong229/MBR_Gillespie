@@ -33,7 +33,7 @@ else
     hold on
     h1 = plot([celldist(1,1), cellend(1,1)],[celldist(1,2),cellend(1,2)],'-k');
     axis equal
-    while intersect == 0 & i <= numcell
+    while intersect == 0 && i <= numcell
         set(h1,'XData',[celldist(i,1), cellend(i,1)],'YData',[celldist(i,2),cellend(i,2)]);
         detxytemp = det([celldist(i,1:2);cellend(i,1:2)]);
         detxtemp = det([celldist(i,1) 1;cellend(i,1) 1]);
@@ -45,11 +45,11 @@ else
         
         lim = [min(cellend(i,1),celldist(i,1)),max(cellend(i,1),celldist(i,1))];
         % check if point is on cell segment
-        if Px <= lim(2) & Px >= lim(1) & Px <= max(posn(1),posnend(1)) & Px>=min(posn(1),posnend(1))
+        if Px <= lim(2) && Px >= lim(1) && Px <= max(posn(1),posnend(1)) && Px>=min(posn(1),posnend(1))
             % intersection found
             intersect = 1;
-            fprintf('Intersects with cell %d\n',i)
-            keyboard
+            %fprintf('Intersects with cell %d\n',i)
+            %keyboard
         end 
         i = i+1;
         

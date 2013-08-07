@@ -48,7 +48,7 @@ function [] = MBRmovie(timeVec, state)
     bacHead = bacHead';
     cellAngle = state.cellAngle + repmat(th,[1,numcell]); % in world frame
     dbac = 10*[cosd(cellAngle(1,:))' sind(cellAngle(1,:))'];
-    bacTail = bacHead - dbac;
+    bacTail = bacHead + dbac;
         
     % plot cells
     for j = 1:size(state.cellposn,1)

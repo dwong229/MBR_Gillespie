@@ -7,7 +7,7 @@ simMode = 5; %1: one simulation, 2: repetition
 %%%%%%%%
 repeatSim = 100;
 
-simIterations = 500;
+simIterations = 500*10;
 
 %% simulation parameters
 delta = 0; % A -> I   reduced ligand detected
@@ -286,9 +286,7 @@ switch simMode
             
             avgdx = mean(stats.dx,1);
             stddx = std(stats.dx,1);
-            fprintf('Mean displacement ratio: (%4.0f,%4.0f), stdev: (%4.0f,%4.0f) \n',avgdx(1),avgdx(2),stddx(1),stddx(2))
-
-               
+            fprintf('Mean displacement ratio: (%4.0f,%4.0f), stdev: (%4.0f,%4.0f) \n',avgdx(1),avgdx(2),stddx(1),stddx(2))              
         
     otherwise
         disp('Invalid simMode')

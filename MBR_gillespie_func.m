@@ -18,7 +18,8 @@ tumbleconstant = 0; % CCW>0, CW<0
 %Tumble constant should be positive, so that it exerts CCW torque on MBR
 
 %Initiate cells on MBR
-numcell = 30;
+numcell = 200;
+celllength = 3; %um
 MBRstate = struct('posn',[0 0 360*rand(1)],'cellposn',[],'F',ones(1,numcell)); %in fixed/world frame
 
 % initial chem state:
@@ -31,16 +32,15 @@ rxncell(1) = 0;
 nextRxnTime = zeros(2,numcell);
 
 % MBR geometry:sq of sizes 40:
-%place cells at center of each edge
-%MBRstate.cellposn(1:numcell,1:2) = [20,0;0,-20;-20,0;0,20]; %in MBR frame
-MBRstate.cellposn(1:numcell,1:2) = [rand(numcell,2)*40-20]; %in MBR frame
-MBRstate.cellposn(1:numcell,3) = [360*rand(numcell,1)];
-%MBRstate.cellposn(1:4,3) = [0 -90 -180 -270];
-%MBRstate.cellposn(1:numcell,3) = [zeros(1,numcell)];
+% generate cell distribution on MBR
+MBRcorners = zeros(5,2);
+MBRcorners(:,1) = [-20 -20 20 20 -20];
+MBRcorners(:,2) = [-20 20 20 -20 -20];
+
+MBRstate.cellposn = mbr_cell_distribution(MBRcorners,numcell,celllength);
 
 %% Determine if the bacterium hangs over the edge of microstructure
 %(for adding edge force)
-celllength = 10; %um
 edgecell = zeros(1,numcell); % store 1 if edge bacterium 
 
 % compute location of flagellum
@@ -48,12 +48,12 @@ cellangle = MBRstate.cellposn(:,3);
 dbac = celllength*[cosd(cellangle) sind(cellangle)];
 
 bacHead = MBRstate.cellposn(:,1:2); 
-bacTail = bacHead - dbac;
+bacTail = bacHead + dbac;
 
 edgecell = max(abs(bacTail),[],2)>20; % setup for 40x40 sq mbr
 
 %% test correct edge detection
-if true
+if false
 flagella1 = figure;
 plot([-20 -20 20 20 -20],[-20 20 20 -20 -20],'-k')
 for cell = 1:numcell
@@ -77,8 +77,8 @@ dyNormal = sind(th);
 quiver(MBRstate.cellposn(1:numcell,1), MBRstate.cellposn(1:numcell,2),dxNormal,dyNormal);
 
 thTangent = edgecell.* MBRstate.cellposn(:,3);
-dxTangent = -sind(thTangent);
-dyTangent = cosd(thTangent);
+dxTangent = sind(thTangent);
+dyTangent = -cosd(thTangent);
 quiver(MBRstate.cellposn(edgecell==1,1), MBRstate.cellposn(edgecell==1,2),dxTangent(edgecell==1),dyTangent(edgecell==1));
 keyboard
 end
@@ -119,7 +119,7 @@ if troubleshoot
     
 end
     
-MBRstate.cellAngle(1,:) = MBRstate.cellposn(:,3)';
+%MBRstate.cellAngle(1,:) = MBRstate.cellposn(:,3)';
 
 %% cycle through reactions to determine dynamics
 for i = 2:simIterations

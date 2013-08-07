@@ -1,4 +1,4 @@
-%function [dist] = mbr_cell_distribution(corners,numcell,varargin)
+function [dist] = mbr_cell_distribution(corners,numcell,varargin)
 
 %MRB_CELL_DISTRIBUTION randomly determines the position of NUMCELL on and
 %mbr of shape defined by corners.
@@ -21,20 +21,20 @@
 % divide MBR into rectangles based on corners
 
 % number of variable inputs
-% nargin;
-% if nargin > 0
-%     celllength = varargin{1};
-% else
-%     celllength = 5;
-% end
+nargin;
+if nargin > 0
+    celllength = varargin{1};
+else
+    celllength = 5;
+end
 
-corners = zeros(5,2);
-corners(:,1) = [-20 -20 20 20 -20];
-corners(:,2) = [-20 20 20 -20 -20];
+%corners = zeros(5,2);
+%corners(:,1) = [-20 -20 20 20 -20];
+%corners(:,2) = [-20 20 20 -20 -20];
 
-numcell = 40;
+%numcell = 400;
 
-celllength = 5;
+%celllength = 3;
 
 % initialize matrix to store posn of cells
 dist = zeros(numcell,3);
@@ -54,8 +54,8 @@ while i < numcell
             % check for intersections
             intersect = check_line_intersection(posnTemp,dist,celllength);
             if intersect == 1
-                disp('Regenerate')
-                keyboard
+                %disp('Regenerate')
+                %keyboard
             end
         end
         
@@ -65,7 +65,7 @@ while i < numcell
     
     % iterate counter
     i = i+1;
-    fprintf('%d cells placed\n',i) 
+    %fprintf('%d cells placed\n',i) 
 end
 
 % plot distribution
@@ -77,7 +77,7 @@ cellangle = dist(:,3);
 dbac = celllength*[cosd(cellangle) sind(cellangle)];
 
 bacHead = dist(:,1:2); 
-bacTail = bacHead - dbac;
+bacTail = bacHead + dbac;
 
 edgecell = max(abs(bacTail),[],2)>20; % setup for 40x40 sq mbr
 
