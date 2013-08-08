@@ -23,7 +23,6 @@ tumbleTime= repmat(timeVec(end),[1 numCells]) - runTime;
 
 rtRatio = runTime./tumbleTime;
 
-
 if isinf(rtRatio)
     disp('rtRatio inf')
     keyboard

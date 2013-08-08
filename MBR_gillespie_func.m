@@ -18,7 +18,7 @@ tumbleconstant = 0; % CCW>0, CW<0
 %Tumble constant should be positive, so that it exerts CCW torque on MBR
 
 %Initiate cells on MBR
-numcell = 200;
+numcell = 400;
 celllength = 3; %um
 MBRstate = struct('posn',[0 0 360*rand(1)],'cellposn',[],'F',ones(1,numcell)); %in fixed/world frame
 
@@ -38,7 +38,7 @@ MBRcorners(:,1) = [-20 -20 20 20 -20];
 MBRcorners(:,2) = [-20 20 20 -20 -20];
 
 MBRstate.cellposn = mbr_cell_distribution(MBRcorners,numcell,celllength);
-
+keyboard
 %% Determine if the bacterium hangs over the edge of microstructure
 %(for adding edge force)
 edgecell = zeros(1,numcell); % store 1 if edge bacterium 
@@ -143,7 +143,10 @@ for i = 2:simIterations
     kt = 1; % p/kt
     kr = 1;
     p = 0.41; %pN from lit 
-    q = 1.5e-6;  %pN from ASME IDETC 2012
+    q = 1.5e-3;  %10^-15N = 10^-3pN from IROS submission 2013
+    FdragTrans = 7; %EBS's tranlating U comsol
+    FdragRot = 2.46e-2; %EB comsol 10^-14Nm, 10^-2 pNm
+    
     
     bx = MBRstate.cellposn(:,1);
     by = MBRstate.cellposn(:,2);
