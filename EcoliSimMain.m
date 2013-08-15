@@ -3,11 +3,11 @@ clear
 close all
 %%%%%%%%
 simMode = 5; %1: one simulation, 2: repetition
-% 6: repetition of 4 
+% 6: repetition of 4
 %%%%%%%%
 repeatSim = 100;
 
-simIterations = 500*10;
+simIterations = 10000;
 
 %% simulation parameters
 delta = 0; % A -> I   reduced ligand detected
@@ -25,7 +25,7 @@ rho = 1; % run to tumble
 
 % fudge factors that control impact of conc detection:
 phi = gamma;   % I-> A   ligand binding
-alpha_a = alpha*1.5; % A + AA -> A + AAp 
+alpha_a = alpha*1.5; % A + AA -> A + AAp
 gamma_a = gamma*1.5; % A + YYp -> A + YY
 rxnrate = [phi delta alpha beta gamma mu rho alpha_a gamma_a];
 
@@ -142,7 +142,7 @@ switch simMode
         
         %plot_attract_exp(pathhandle,[xmin xmax ymin ymax])
         plot_attract_lin(pathhandle,[xmin xmax ymin ymax])
-    
+        
     case 4
         disp('Running Repetition of Simulation with attractant')
         
@@ -193,10 +193,10 @@ switch simMode
         stddx = std(stats.dx,1);
         fprintf('Mean displacement ratio: (%4.0f,%4.0f), stdev: (%4.0f,%4.0f) \n',avgdx(1),avgdx(2),stddx(1),stddx(2))
         
-    
+        
     case 5
         disp('Run MBR simulation once')
-         % Computation for single cell:
+        % Computation for single cell:
         % Simulate
         
         %disp('Running Simulation Once with Attractant')
@@ -206,7 +206,24 @@ switch simMode
         
         
         init = [I A AA AAp YY YYp Mot Run];
-        [timeVec,state] =  MBR_gillespie_func(rxnrate,init,simIterations,attractant);
+        
+        %Initiate cells on MBR
+        numcell = 100;
+        celllength = 3; %um
+        MBRcorners = zeros(5,2);
+        MBRcorners(:,1) = [-20 -20 20 20 -20];
+        MBRcorners(:,2) = [-20 20 20 -20 -20];
+
+        cellposnfile = 'cellposn400cells.mat';
+            if exist(cellposnfile,'file') == 2
+               disp('Loading cell-position file')
+                load(cellposnfile)
+            else
+                disp('Generating cell-positions')
+                 cellposn = mbr_cell_distribution(MBRcorners,numcell,celllength);
+                 
+            end
+        [timeVec,state] =  MBR_gillespie_func(rxnrate,init,simIterations,attractant,cellposn);
         simTime = floor(timeVec(end)*0.75);
         
         %plot simulation
@@ -232,29 +249,58 @@ switch simMode
         print(gcf,'-djpeg','posOrientationSim1.jpg')
         
         figure
-        plot(x,y)    
+        plot(x,y)
         
         [rtRatio,dtheta,dx] = eval_MBR_gillespie(timeVec,state,simTime)
         % make a movie to simulate mbr state:
-        MBRmovie(timeVec,state)
+        %MBRmovie(timeVec,state)
         
     case 6
         disp('Running Repetition of MBR Simulation')
         
-        t = CTimeleft(repeatSim);
         attractant = @(x) 0;
+           
+        fixedcellposn = true;
         
+        if fixedcellposn
+            disp('Generate a single distribution and observe variability')
+            %Initiate cells on MBR
+            numcell = 400;
+            celllength = 3; %um
+            MBRcorners = zeros(5,2);
+            MBRcorners(:,1) = [-20 -20 20 20 -20];
+            MBRcorners(:,2) = [-20 20 20 -20 -20];
+            
+            cellposnfile = 'cellposn400cells.mat';
+            if exist(cellposnfile,'file') == 2
+               disp('Loading cell-position file')
+                load(cellposnfile)
+            else
+                disp('Generating cell-positions')
+                 cellposn = mbr_cell_distribution(MBRcorners,numcell,celllength);
+                 
+            end
+        else
+            cellposn = [];
+        end
+        
+        
+        t = CTimeleft(repeatSim);
         for rep = 1:repeatSim
             t.timeleft();
             plotnow = false;
             
             % run simulation
             init = [I A AA AAp YY YYp Mot Run];
-            [timeVec,state] =  MBR_gillespie_func(rxnrate,init,simIterations,attractant);
-        
+            
+            [timeVec,state] =  MBR_gillespie_func(rxnrate,init,simIterations,attractant,cellposn);
+            
             % compute stats
             if rep == 1
-                simTime = floor(timeVec(end)*0.75);
+                %simTime = floor(timeVec(end)*0.75);
+                simTime = timeVec(end)*0.75;
+                fprintf('simTime = %4.4f \n',simTime)
+                %simTime = 10; % 10 second simulation time.
             end
             
             [rtRatio,dtheta,dx] = eval_MBR_gillespie(timeVec,state,simTime);
@@ -263,31 +309,31 @@ switch simMode
             stats.dtheta(rep) = dtheta;
             stats.rtratio(rep,:) = rtRatio;
         end
-            %plots
-            figure
-            hist(stats.rtratio(:),[0:2:100])
-            axis([0 100 0 150])
-            title('Histogram of run/tumble ratio')
-            xlabel('run/tumble ratio')
-            ylabel('frequency')
-            
-            figure
-            for i = 1:size(stats.dx,1)
-                hold on
-                line([0 stats.dx(i,1)],[0 stats.dx(i,2)])
-            end
-            title('Random Walk Planar Displacement')
-            xlabel('x (um)')
-            ylabel('y (um)')
-            
-            avgrtratio = mean(stats.rtratio(:));
-            stdrtratio = std(stats.rtratio(:));
-            fprintf('Mean run-tumble ratio: %4.4f, stdev: %4.4f \n',avgrtratio,stdrtratio)
-            
-            avgdx = mean(stats.dx,1);
-            stddx = std(stats.dx,1);
-            fprintf('Mean displacement ratio: (%4.0f,%4.0f), stdev: (%4.0f,%4.0f) \n',avgdx(1),avgdx(2),stddx(1),stddx(2))              
+        %plots
+        figure
+        hist(stats.dtheta(:))
+        %axis([0 100 0 150])
+        title('Histogram of angular velocity ratio')
+        xlabel('angular velocity')
+        ylabel('frequency')
         
+%         figure
+%         for i = 1:size(stats.dx,1)
+%             hold on
+%             line([0 stats.dx(i,1)],[0 stats.dx(i,2)])
+%         end
+%         title('Random Walk Planar Displacement')
+%         xlabel('x (um)')
+%         ylabel('y (um)')
+%         
+%         avgrtratio = mean(stats.rtratio(:));
+%         stdrtratio = std(stats.rtratio(:));
+%         fprintf('Mean run-tumble ratio: %4.4f, stdev: %4.4f \n',avgrtratio,stdrtratio)
+%         
+%         avgdx = mean(stats.dx,1);
+%         stddx = std(stats.dx,1);
+%         fprintf('Mean displacement ratio: (%4.0f,%4.0f), stdev: (%4.0f,%4.0f) \n',avgdx(1),avgdx(2),stddx(1),stddx(2))
+%         
     otherwise
         disp('Invalid simMode')
 end
@@ -297,13 +343,13 @@ end
 % when Run == 1: run
 
 if simMode<5
-disp('....For the last round')
-[runTime,tumbleTime,rtRatio,dx] = runtumble(timeVec,state,simTime);
-fprintf('Run Time: %4.1f s, Tumble Time: %4.1f s. Run/Tumble: %4.4f \n',runTime, tumbleTime,rtRatio)
-fprintf('Displacement: (%4.0f,%4.0f) um \n',dx(1),dx(2))
-
-tumble = state.chem(1:end-1,8) - state.chem(2:end,8);
-tFreq = sum(tumble==1)/timeVec(end);
-%rFreq = sum(tumble ==-1)/timeVec(end);
-fprintf('Tumble Freq: %4.2f /s \n',tFreq)
+    disp('....For the last round')
+    [runTime,tumbleTime,rtRatio,dx] = runtumble(timeVec,state,simTime);
+    fprintf('Run Time: %4.1f s, Tumble Time: %4.1f s. Run/Tumble: %4.4f \n',runTime, tumbleTime,rtRatio)
+    fprintf('Displacement: (%4.0f,%4.0f) um \n',dx(1),dx(2))
+    
+    tumble = state.chem(1:end-1,8) - state.chem(2:end,8);
+    tFreq = sum(tumble==1)/timeVec(end);
+    %rFreq = sum(tumble ==-1)/timeVec(end);
+    fprintf('Tumble Freq: %4.2f /s \n',tFreq)
 end

@@ -1,4 +1,4 @@
-function [timeVec,MBRstate]= MBR_gillespie_func(rxnrate,init,simIterations,attractant)
+function [timeVec,MBRstate]= MBR_gillespie_func(rxnrate,init,simIterations,attractant,varargin)
 % Used in EcoliSimMain to run n-independent Gillespie simulations for cells
 % adhered to an MBR.  
 % ----- Inputs 
@@ -13,23 +13,25 @@ function [timeVec,MBRstate]= MBR_gillespie_func(rxnrate,init,simIterations,attra
 %       - MBRstate vector with information on state of MBR corresponding to the
 %       timeVec.
 
+MBRstate = struct('posn',[0 0 360*rand(1)],'cellposn',[],'F',[]); %in fixed/world frame
+
+% varargin for cell distribution provided
+if nargin == 5
+    MBRstate.cellposn = varargin{1};
+    
+end
+
 % tumble torque
 tumbleconstant = 0; % CCW>0, CW<0 
 %Tumble constant should be positive, so that it exerts CCW torque on MBR
 
-%Initiate cells on MBR
+%Initiate cells on MBR (default)
 numcell = 400;
 celllength = 3; %um
-MBRstate = struct('posn',[0 0 360*rand(1)],'cellposn',[],'F',ones(1,numcell)); %in fixed/world frame
-
-% initial chem state:
-cellstate = repmat(init,[1,1,numcell]); %cellstate(timeidx,chem,cell)
 
 %initialize variables
 timeVec(1) = 0;
 rxncell(1) = 0;
-% matrix storing the time of next rxn in row 1 and rxn number in row 2
-nextRxnTime = zeros(2,numcell);
 
 % MBR geometry:sq of sizes 40:
 % generate cell distribution on MBR
@@ -37,8 +39,19 @@ MBRcorners = zeros(5,2);
 MBRcorners(:,1) = [-20 -20 20 20 -20];
 MBRcorners(:,2) = [-20 20 20 -20 -20];
 
-MBRstate.cellposn = mbr_cell_distribution(MBRcorners,numcell,celllength);
-keyboard
+
+if isempty(MBRstate.cellposn)
+    MBRstate.cellposn = mbr_cell_distribution(MBRcorners,numcell,celllength);
+else
+    numcell = length(MBRstate.cellposn);
+end
+% initial chem state:
+cellstate = repmat(init,[1,1,numcell]); %cellstate(timeidx,chem,cell)
+% matrix storing the time of next rxn in row 1 and rxn number in row 2
+nextRxnTime = zeros(2,numcell);
+
+MBRstate.F = ones(1,numcell);
+%keyboard
 %% Determine if the bacterium hangs over the edge of microstructure
 %(for adding edge force)
 edgecell = zeros(1,numcell); % store 1 if edge bacterium 
@@ -80,7 +93,7 @@ thTangent = edgecell.* MBRstate.cellposn(:,3);
 dxTangent = sind(thTangent);
 dyTangent = -cosd(thTangent);
 quiver(MBRstate.cellposn(edgecell==1,1), MBRstate.cellposn(edgecell==1,2),dxTangent(edgecell==1),dyTangent(edgecell==1));
-keyboard
+%keyboard
 end
 
 %% generate a time and rxn for each cell
@@ -92,7 +105,7 @@ for j = 1:numcell
 end
 
 %% trouble shooting dxdt_f, dydt_f, dadt_f, dxdt, dydt, dadt
-troubleshoot = true;
+troubleshoot = false;
 if troubleshoot
     disp('Troubleshoot = True')
     figure;
@@ -121,10 +134,11 @@ end
     
 %MBRstate.cellAngle(1,:) = MBRstate.cellposn(:,3)';
 
+disp('MBR simulation started')
+
 %% cycle through reactions to determine dynamics
 for i = 2:simIterations
     % determine next reaction from nextRxnTime
-    
     [rxntime cellnum] = min(nextRxnTime(1,:));
     rxncell(i) = cellnum;
     timeVec(i) = rxntime;
