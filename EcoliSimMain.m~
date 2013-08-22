@@ -210,9 +210,9 @@ switch simMode
         %Initiate cells on MBR
         numcell = 100;
         celllength = 3; %um
-        MBRcorners = struct('cells',zeros(2,2),'nocells',[]);
-        MBRcorners.cells(:,1) = [-20;20]; %x coordinates
-        MBRcorners.cells(:,2) = [-20;20]; %y coordinates
+        MBRcorners = struct('cells',zeros(5,2),'nocells',[]);
+        MBRcorners.cells(:,1) = [-20 20]; %x coordinates
+        MBRcorners.cells(:,2) = [-20 20];
                 
         cellposnfile = 'cellposn400cells.mat';
         cellposnfile = [];

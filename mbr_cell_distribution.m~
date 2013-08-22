@@ -89,13 +89,7 @@ bacTail = bacHead + dbac;
 % for outside of square
 %edgecell = max(abs(bacTail),[],2)>; % setup for 40x40 sq mbr
 edgecell = is_point_in_box(corners.cells,bacTail);
-
-%% TO DO
-% check if tail is in nocell regions
-%edgenocellregion = ~is_point_in_box(corners.nocells,bacTail);
-%edgecell = max([edgecell,edgenocellregion],[],2);
-%%%%%%%%%%%%%%%%%%%
-
+% cehck
 %% PLOT
 figure
 title('MBR cell distribution')
