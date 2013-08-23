@@ -7,7 +7,7 @@ simMode = 5; %1: one simulation, 2: repetition
 %%%%%%%%
 repeatSim = 100;
 
-simIterations = 1000;
+simIterations = 5000;
 
 %% simulation parameters
 delta = 0; % A -> I   reduced ligand detected
@@ -208,14 +208,18 @@ switch simMode
         init = [I A AA AAp YY YYp Mot Run];
         
         %Initiate cells on MBR
-        numcell = 100;
+        numcell = 200;
         celllength = 3; %um
         MBRcorners = struct('cells',zeros(2,2),'nocells',[]);
+        
+        %% U
         MBRcorners.cells(:,1) = [-20;20]; %x coordinates
         MBRcorners.cells(:,2) = [-20;20]; %y coordinates
-                
+        MBRcorners.nocells = [-10 -10;10 20];
+        %% 
+        
         cellposnfile = 'cellposn400cells.mat';
-        cellposnfile = [];
+        cellposnfile = 'cellposnU_200cells_trans.mat';
             if exist(cellposnfile,'file') == 2
                disp('Loading cell-position file')
                 load(cellposnfile)
@@ -224,7 +228,7 @@ switch simMode
                  cellposn = mbr_cell_distribution(MBRcorners,numcell,celllength);
                  
             end
-        [timeVec,state] =  MBR_gillespie_func(rxnrate,init,simIterations,attractant,cellposn);
+        [timeVec,state] =  MBR_gillespie_func(rxnrate,init,simIterations,attractant,MBRcorners,cellposn);
         simTime = floor(timeVec(end)*0.75);
         
         %plot simulation
@@ -254,7 +258,7 @@ switch simMode
         
         [rtRatio,dtheta,dx] = eval_MBR_gillespie(timeVec,state,simTime)
         % make a movie to simulate mbr state:
-        %MBRmovie(timeVec,state)
+        MBRmovie(timeVec,state)
         
     case 6
         disp('Running Repetition of MBR Simulation')

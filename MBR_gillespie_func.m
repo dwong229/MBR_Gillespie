@@ -1,4 +1,4 @@
-function [timeVec,MBRstate]= MBR_gillespie_func(rxnrate,init,simIterations,attractant,varargin)
+function [timeVec,MBRstate]= MBR_gillespie_func(rxnrate,init,simIterations,attractant,MBRcorners,varargin)
 % Used in EcoliSimMain to run n-independent Gillespie simulations for cells
 % adhered to an MBR.  
 % ----- Inputs 
@@ -16,36 +16,27 @@ function [timeVec,MBRstate]= MBR_gillespie_func(rxnrate,init,simIterations,attra
 MBRstate = struct('posn',[0 0 360*rand(1)],'cellposn',[],'F',[]); %in fixed/world frame
 
 % varargin for cell distribution provided
-if nargin == 5
+if nargin == 6
     MBRstate.cellposn = varargin{1};
-    
+else
+    MBRstate.cellposn = [];
 end
+
 
 % tumble torque
 tumbleconstant = 0; % CCW>0, CW<0 
 %Tumble constant should be positive, so that it exerts CCW torque on MBR
 
 %Initiate cells on MBR (default)
-numcell = 400;
+numcell = 100;
 celllength = 3; %um
 
 %initialize variables
 timeVec(1) = 0;
 rxncell(1) = 0;
 
-% MBR geometry:sq of sizes 40:
-% generate cell distribution on MBR
-MBRcorners.cells = zeros(2,2);
-%MBRcorners.cells(:,1) = [-20 -20 20 20 -20];
-%MBRcorners.cells(:,2) = [-20 20 20 -20 -20];
-MBRcorners.cells(:,1) = [-20 20];
-MBRcorners.cells(:,2) = [-20 20];
-
-
-MBRcorners.nocells = [];
-
 if isempty(MBRstate.cellposn)
-    MBRstate.cellposn = mbr_cell_distribution(MBRcorners,numcell,celllength);
+    [MBRstate.cellposn,edgecell,bacHead,bacTail] = mbr_cell_distribution(MBRcorners,numcell,celllength);
 else
     numcell = length(MBRstate.cellposn);
 end
@@ -56,23 +47,28 @@ nextRxnTime = zeros(2,numcell);
 
 MBRstate.F = ones(1,numcell);
 %keyboard
+
+
 %% Determine if the bacterium hangs over the edge of microstructure
-%(for adding edge force)
+% determine edge bacteria
 edgecell = zeros(1,numcell); % store 1 if edge bacterium 
 
-% compute location of flagellum
-cellangle = MBRstate.cellposn(:,3);
-dbac = celllength*[cosd(cellangle) sind(cellangle)];
+[edgecell,bacHead,bacTail] = find_edge_bacteria(MBRcorners.cells,MBRcorners.nocells,MBRstate.cellposn,celllength);
 
-bacHead = MBRstate.cellposn(:,1:2); 
-bacTail = bacHead + dbac;
-
-edgecell = max(abs(bacTail),[],2)>20; % setup for 40x40 sq mbr
 
 %% test correct edge detection
 if false
 flagella1 = figure;
-plot([-20 -20 20 20 -20],[-20 20 20 -20 -20],'-k')
+x1 = MBRcorners.cells(1,1);
+y1 = MBRcorners.cells(1,2);
+x2 = MBRcorners.cells(2,1);
+y2 = MBRcorners.cells(2,2);
+
+cornerallpts(:,1) = [x1,x2,x2,x1,x1];
+cornerallpts(:,2) = [y1,y1,y2,y2,y1];
+
+plot(cornerallpts(:,1),cornerallpts(:,2),'-k')
+
 for cell = 1:numcell
     % determine if it is in the MBR
     hold on
@@ -97,7 +93,7 @@ thTangent = edgecell.* MBRstate.cellposn(:,3);
 dxTangent = sind(thTangent);
 dyTangent = -cosd(thTangent);
 quiver(MBRstate.cellposn(edgecell==1,1), MBRstate.cellposn(edgecell==1,2),dxTangent(edgecell==1),dyTangent(edgecell==1));
-%keyboard
+keyboard
 end
 
 %% generate a time and rxn for each cell

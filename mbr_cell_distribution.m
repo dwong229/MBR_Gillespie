@@ -1,4 +1,4 @@
-function [dist] = mbr_cell_distribution(corners,numcell,varargin)
+function [dist,edgecell,bacHead,bacTail] = mbr_cell_distribution(corners,numcell,varargin)
 
 %MRB_CELL_DISTRIBUTION randomly determines the position of NUMCELL on and
 %mbr of shape defined by corners.
@@ -54,11 +54,17 @@ while i < numcell
             % randomly place a cell
             posnTemp = rand(1,3).*[xrange,yrange,360] + [corners.cells(1,1),corners.cells(1,2),0];
             
-            % check if cell positions is valid (e.g. not in a square)
+            % check if cell positions is valid (e.g. not in no cell region square)
+            if is_point_in_box(corners.nocells,posnTemp(1,1:2))==0
+                intersect = 1;
+%                disp('point in nocell region')
+%                keyboard
+            else
+            
             
             % check for intersections
             intersect = check_line_intersection(posnTemp,dist,celllength);
-            if intersect == 1
+            %if intersect == 1
                 %disp('Regenerate')
                 %keyboard
             end
@@ -75,26 +81,11 @@ end
 
 % plot distribution
 %% EDGE BACTERIA 
-% determine edge bacteria for a 40um-square
+% determine edge bacteria
 edgecell = zeros(1,numcell); % store 1 if edge bacterium 
 
-% compute location of flagellum
-cellangle = dist(:,3);
-dbac = celllength*[cosd(cellangle) sind(cellangle)];
+[edgecell,bacHead,bacTail] = find_edge_bacteria(corners.cells,corners.nocells,dist,celllength);
 
-bacHead = dist(:,1:2); 
-bacTail = bacHead + dbac;
-
-% check if bacTail is in a 
-% for outside of square
-%edgecell = max(abs(bacTail),[],2)>; % setup for 40x40 sq mbr
-edgecell = is_point_in_box(corners.cells,bacTail);
-
-%% TO DO
-% check if tail is in nocell regions
-%edgenocellregion = ~is_point_in_box(corners.nocells,bacTail);
-%edgecell = max([edgecell,edgenocellregion],[],2);
-%%%%%%%%%%%%%%%%%%%
 
 %% PLOT
 figure
@@ -103,10 +94,23 @@ x1 = corners.cells(1,1);
 y1 = corners.cells(1,2);
 x2 = corners.cells(2,1);
 y2 = corners.cells(2,2);
+
 cornerallpts(:,1) = [x1,x2,x2,x1,x1];
 cornerallpts(:,2) = [y1,y1,y2,y2,y1];
 
 plot(cornerallpts(:,1),cornerallpts(:,2),'-k')
+
+% plot no cell region
+x1 = corners.nocells(1,1);
+y1 = corners.nocells(1,2);
+x2 = corners.nocells(2,1);
+y2 = corners.nocells(2,2);
+
+hold on
+cornerallpts(:,1) = [x1,x2,x2,x1,x1];
+cornerallpts(:,2) = [y1,y1,y2,y2,y1];
+plot(cornerallpts(:,1),cornerallpts(:,2),'-k')
+
 for cell = 1:numcell
     hold on
      % determine if it is in the MBR

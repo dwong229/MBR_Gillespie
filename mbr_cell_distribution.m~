@@ -54,14 +54,19 @@ while i < numcell
             % randomly place a cell
             posnTemp = rand(1,3).*[xrange,yrange,360] + [corners.cells(1,1),corners.cells(1,2),0];
             
-            % check if cell positions is valid (e.g. not in a square)
+            % check if cell positions is valid (e.g. not in no cell region square)
+            if is_point_in_box(corners.nocells,posnTemp(1,1:2))
+                intersect = 1;
+                disp('point in nocell reg
+            else
+            
             
             % check for intersections
             intersect = check_line_intersection(posnTemp,dist,celllength);
-            if intersect == 1
+            %if intersect == 1
                 %disp('Regenerate')
                 %keyboard
-            end
+            %end
         end
         
     
@@ -88,8 +93,14 @@ bacTail = bacHead + dbac;
 % check if bacTail is in a 
 % for outside of square
 %edgecell = max(abs(bacTail),[],2)>; % setup for 40x40 sq mbr
-edgecell = is_point_in_box(corners.cells,bacTail);
-% cehck
+edgecellregion = is_point_in_box(corners.cells,bacTail);
+
+%% TO DO
+% check if tail is in nocell regions
+edgenocellregion = ~is_point_in_box(corners.nocells,bacTail);
+edgecell = max([edgecellregion,edgenocellregion],[],2);
+%%%%%%%%%%%%%%%%%%%
+
 %% PLOT
 figure
 title('MBR cell distribution')
@@ -97,10 +108,23 @@ x1 = corners.cells(1,1);
 y1 = corners.cells(1,2);
 x2 = corners.cells(2,1);
 y2 = corners.cells(2,2);
+
 cornerallpts(:,1) = [x1,x2,x2,x1,x1];
 cornerallpts(:,2) = [y1,y1,y2,y2,y1];
 
 plot(cornerallpts(:,1),cornerallpts(:,2),'-k')
+
+% plot no cell region
+x1 = corners.nocells(1,1);
+y1 = corners.nocells(1,2);
+x2 = corners.nocells(2,1);
+y2 = corners.nocells(2,2);
+
+hold on
+cornerallpts(:,1) = [x1,x2,x2,x1,x1];
+cornerallpts(:,2) = [y1,y1,y2,y2,y1];
+plot(cornerallpts(:,1),cornerallpts(:,2),'-k')
+
 for cell = 1:numcell
     hold on
      % determine if it is in the MBR
