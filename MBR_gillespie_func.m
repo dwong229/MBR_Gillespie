@@ -20,15 +20,32 @@ if nargin == 6
     MBRstate.cellposn = varargin{1};
 else
     MBRstate.cellposn = [];
+    numcell = 100;
 end
-
 
 % tumble torque
 tumbleconstant = 0; % CCW>0, CW<0 
 %Tumble constant should be positive, so that it exerts CCW torque on MBR
+%update MBR state
+% viscosity constants
+kt = 1; % p/kt
+kr = 1;
+p = 0.41e-12; %pN from lit
+q = 1.5e-15;  %10^-15N = 10^-3pN from IROS submission 2013
+
+% EBS's tranlating U COMSOL
+FdragTrans = 7e-12; %N (7pN)
+VdragTrans = 10e-6; %m/s, 
+
+kt = FdragTrans/VdragTrans; % units 
+
+% EB's rotation COMSOL for sq.
+FdragRot = 2.46e-14; %Nm, torque on bottom, F*d EB comsol 10^-14Nm, 10^-2 pNm
+VdragRot = 0.016; %rad/s
+
+kr = FdragRot/VdragRot; % kg m^2/s
 
 %Initiate cells on MBR (default)
-numcell = 100;
 celllength = 3; %um
 
 %initialize variables
@@ -48,13 +65,11 @@ nextRxnTime = zeros(2,numcell);
 MBRstate.F = ones(1,numcell);
 %keyboard
 
-
 %% Determine if the bacterium hangs over the edge of microstructure
 % determine edge bacteria
 edgecell = zeros(1,numcell); % store 1 if edge bacterium 
 
 [edgecell,bacHead,bacTail] = find_edge_bacteria(MBRcorners.cells,MBRcorners.nocells,MBRstate.cellposn,celllength);
-
 
 %% test correct edge detection
 if false
@@ -152,16 +167,6 @@ for i = 2:simIterations
     
     nextRxnTime(:,rxncell(i)) = [timeVec(i) + tau;newcellchem];    
     
-    %update MBR state
-    % viscosity constants
-    kt = 1; % p/kt
-    kr = 1;
-    p = 0.41; %pN from lit 
-    q = 1.5e-3;  %10^-15N = 10^-3pN from IROS submission 2013
-    FdragTrans = 7; %EBS's tranlating U comsol
-    FdragRot = 2.46e-2; %EB comsol 10^-14Nm, 10^-2 pNm
-    
-    
     bx = MBRstate.cellposn(:,1);
     by = MBRstate.cellposn(:,2);
     th = MBRstate.cellposn(:,3);
@@ -176,18 +181,19 @@ for i = 2:simIterations
     %dydt_f = kt*sum(Fnow.*sind(th)); %mbr frame
     %numtumblecells = sum(Fnow==0);   
     %dadt_f = kr*sum(bx.*Fnow.*sind(th) + by.*Fnow.*cosd(th)) - tumbleconstant*numtumblecells;
-    
+       
     % with side force
     dxdt_f = 1/kt*(p*sum(Fnow.*cosd(th)) - q*sum(Fnow.*edgecell.*sind(th))); %mbr frame
     dydt_f = 1/kt*(p*sum(Fnow.*sind(th)) + q*sum(Fnow.*edgecell.*cosd(th))); %mbr frame
     
     numtumblecells = sum(Fnow==0);   
-    dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p + by.*Fnow.*cosd(th)*p + bx.*Fnow.*cosd(th)*q - by.*Fnow.*sin(th)*q)) + tumbleconstant*numtumblecells;
+    dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p + by.*Fnow.*cosd(th)*p + bx.*Fnow.*cosd(th)*q - by.*Fnow.*sind(th)*q)) + tumbleconstant*numtumblecells;
     
+    % in world-fixed frame
     dxdt = (dxdt_f)*cosd(MBRstate.posn(i-1,3)) - dydt_f*sind(MBRstate.posn(i-1,3));
-    dydt = (dxdt_f)*sind(MBRstate.posn(i-1,3)) + dydt_f*cosd(MBRstate.posn(i-1,3));
+    dydt = (dxdt_f)*sind(MBRstate.posn(i-1,3)) + dydt_f*cosd(MBRstate.posn(i-1,3));    
     dadt = dadt_f;
-        
+    
     if troubleshoot
         % update velocity vectors
         dxdt_fvec = [dxdt_fvec dxdt_f];

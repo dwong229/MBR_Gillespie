@@ -14,14 +14,11 @@ function [notinbox] = is_point_in_box(boxcorners,point)
 % OUTPUT
 % inbox SIZE = [n,2]
 
-%% Allow for multiple pairs of corners as well
 numpt = size(point,1);
-
+%% Allow for multiple pairs of corners as well
 numbox = size(boxcorners,1)/2;
+
 for i = 1:numbox
-    
-    inbox = zeros(1,numpt);
-    
     %define bounds
     lo = 2*i-1;
     hi= 2*i;

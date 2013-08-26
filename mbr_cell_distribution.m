@@ -55,18 +55,20 @@ while i < numcell
             posnTemp = rand(1,3).*[xrange,yrange,360] + [corners.cells(1,1),corners.cells(1,2),0];
             
             % check if cell positions is valid (e.g. not in no cell region square)
-            if is_point_in_box(corners.nocells,posnTemp(1,1:2))==0
-                intersect = 1;
-%                disp('point in nocell region')
-%                keyboard
-            else
-            
-            
-            % check for intersections
-            intersect = check_line_intersection(posnTemp,dist,celllength);
-            %if intersect == 1
-                %disp('Regenerate')
-                %keyboard
+            if ~isempty(corners.nocells)
+                if is_point_in_box(corners.nocells,posnTemp(1,1:2))==0
+                    intersect = 1;
+                    %                disp('point in nocell region')
+                    %                keyboard
+                else
+                    
+                    
+                    % check for intersections
+                    intersect = check_line_intersection(posnTemp,dist,celllength);
+                    %if intersect == 1
+                    %disp('Regenerate')
+                    %keyboard
+                end
             end
         end
         

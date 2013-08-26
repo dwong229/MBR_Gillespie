@@ -7,7 +7,7 @@ simMode = 5; %1: one simulation, 2: repetition
 %%%%%%%%
 repeatSim = 100;
 
-simIterations = 5000;
+simIterations = 1000;
 
 %% simulation parameters
 delta = 0; % A -> I   reduced ligand detected
@@ -204,7 +204,6 @@ switch simMode
         disp('Running Simulation Once without Attractant')
         attractant = @(x) 0;
         
-        
         init = [I A AA AAp YY YYp Mot Run];
         
         %Initiate cells on MBR
@@ -216,18 +215,27 @@ switch simMode
         MBRcorners.cells(:,1) = [-20;20]; %x coordinates
         MBRcorners.cells(:,2) = [-20;20]; %y coordinates
         MBRcorners.nocells = [-10 -10;10 20];
-        %% 
         
+        %% Square
+        MBRcorners.cells(:,1) = [-20;20]; %x coordinates
+        MBRcorners.cells(:,2) = [-20;20]; %y coordinates
+        MBRcorners.nocells = [];
+        
+        %%  Meters to micrometers
+        MBRcorners.cells = MBRcorners.cells*10^-6;
+        MBRcorners.nocells = MBRcorners.nocells*10^-6;
+        %% 
         cellposnfile = 'cellposn400cells.mat';
-        cellposnfile = 'cellposnU_200cells_trans.mat';
-            if exist(cellposnfile,'file') == 2
-               disp('Loading cell-position file')
-                load(cellposnfile)
-            else
-                disp('Generating cell-positions')
-                 cellposn = mbr_cell_distribution(MBRcorners,numcell,celllength);
-                 
-            end
+        %cellposnfile = 'cellposnU_200cells_trans.mat';
+        %cellposnfile = [];
+        if exist(cellposnfile,'file') == 2
+            disp('Loading cell-position file')
+            load(cellposnfile)
+        else
+            disp('Generating cell-positions')
+            cellposn = mbr_cell_distribution(MBRcorners,numcell,celllength);
+        end
+        
         [timeVec,state] =  MBR_gillespie_func(rxnrate,init,simIterations,attractant,MBRcorners,cellposn);
         simTime = floor(timeVec(end)*0.75);
         

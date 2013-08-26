@@ -17,7 +17,12 @@ bacTail = bacHead + dbac;
 %edgecell = max(abs(bacTail),[],2)>; % setup for 40x40 sq mbr
 edgecellregion = is_point_in_box(cellregion,bacTail);
 
-% check if tail is in nocell regions
-edgenocellregion = ~is_point_in_box(nocellregion,bacTail);
+if ~isempty(nocellregion)
+    % check if tail is in nocell regions
+    edgenocellregion = ~is_point_in_box(nocellregion,bacTail);
+else
+    edgenocellregion = ones(size(edgecellregion))*-1;
+end
+
 edgecell = max([edgecellregion,edgenocellregion],[],2);
 
