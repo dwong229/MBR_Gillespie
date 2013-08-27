@@ -16,34 +16,44 @@ function [timeVec,MBRstate]= MBR_gillespie_func(rxnrate,init,simIterations,attra
 MBRstate = struct('posn',[0 0 360*rand(1)],'cellposn',[],'F',[]); %in fixed/world frame
 
 % varargin for cell distribution provided
-if nargin == 6
+if nargin == 6 && ~isempty(varargin{1})
     MBRstate.cellposn = varargin{1};
 else
     MBRstate.cellposn = [];
-    numcell = 100;
+    numcell = 200;
 end
 
 % tumble torque
-tumbleconstant = 0; % CCW>0, CW<0 
+tumbleconstant = 0; %[Nm] CCW>0, CW<0 
 %Tumble constant should be positive, so that it exerts CCW torque on MBR
 %update MBR state
 % viscosity constants
 kt = 1; % p/kt
 kr = 1;
 p = 0.41e-12; %pN from lit
+p = 0;
 q = 1.5e-15;  %10^-15N = 10^-3pN from IROS submission 2013
+q = 615e-12/10;
+
+% convert p and q to up and uq
+%p = p*1e6;
+%q = q*1e6;
 
 % EBS's tranlating U COMSOL
-FdragTrans = 7e-12; %N (7pN)
+FdragTrans = 7e-12; %N = kg m/s^2 (7pN)
 VdragTrans = 10e-6; %m/s, 
 
-kt = FdragTrans/VdragTrans; % units 
+kt = FdragTrans/VdragTrans; % units kg/s
 
-% EB's rotation COMSOL for sq.
+%E EB's rotation COMSOL for sq.
 FdragRot = 2.46e-14; %Nm, torque on bottom, F*d EB comsol 10^-14Nm, 10^-2 pNm
-VdragRot = 0.016; %rad/s
+%uFdragRot = FdragRot * (1e12);
+VdragRot = rad2deg(0.016); %rad/s
 
 kr = FdragRot/VdragRot; % kg m^2/s
+
+% convert to um
+kr = kr*10^6;
 
 %Initiate cells on MBR (default)
 celllength = 3; %um
@@ -65,12 +75,17 @@ nextRxnTime = zeros(2,numcell);
 MBRstate.F = ones(1,numcell);
 %keyboard
 
+% convert from um to m:
+%MBRcorners.cells = MBRcorners.cells*10^-6;
+%MBRcorners.nocells = MBRcorners.nocells*10^-6;
+%MBRstate.cellposn(:,1:2) = MBRstate.cellposn(:,1:2)*10^-6;
+%celllength = celllength*10^-6;
+
 %% Determine if the bacterium hangs over the edge of microstructure
 % determine edge bacteria
-edgecell = zeros(1,numcell); % store 1 if edge bacterium 
+%edgecell = zeros(1,numcell); % store 1 if edge bacterium 
 
 [edgecell,bacHead,bacTail] = find_edge_bacteria(MBRcorners.cells,MBRcorners.nocells,MBRstate.cellposn,celllength);
-
 %% test correct edge detection
 if false
 flagella1 = figure;
@@ -147,14 +162,16 @@ if troubleshoot
     
 end
     
-%MBRstate.cellAngle(1,:) = MBRstate.cellposn(:,3)';
+%disp('MBR simulation started')
 
-disp('MBR simulation started')
+% initialize cellAngles
+MBRstate.cellAngle(1,:) = MBRstate.cellposn(:,3)';
+
 
 %% cycle through reactions to determine dynamics
 for i = 2:simIterations
     % determine next reaction from nextRxnTime
-    [rxntime cellnum] = min(nextRxnTime(1,:));
+    [rxntime,cellnum] = min(nextRxnTime(1,:));
     rxncell(i) = cellnum;
     timeVec(i) = rxntime;
     
@@ -187,7 +204,7 @@ for i = 2:simIterations
     dydt_f = 1/kt*(p*sum(Fnow.*sind(th)) + q*sum(Fnow.*edgecell.*cosd(th))); %mbr frame
     
     numtumblecells = sum(Fnow==0);   
-    dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p + by.*Fnow.*cosd(th)*p + bx.*Fnow.*cosd(th)*q - by.*Fnow.*sind(th)*q)) + tumbleconstant*numtumblecells;
+    dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p + by.*Fnow.*cosd(th)*p + bx.*Fnow.*cosd(th)*q - by.*Fnow.*sind(th)*q) + tumbleconstant*numtumblecells);
     
     % in world-fixed frame
     dxdt = (dxdt_f)*cosd(MBRstate.posn(i-1,3)) - dydt_f*sind(MBRstate.posn(i-1,3));
@@ -231,3 +248,6 @@ for i = 2:simIterations
     MBRstate.cellAngle(i,:) = MBRstate.cellposn(:,3)';
     
 end
+
+% convert m to um
+MBRstate.posn(:,1:2) = MBRstate.posn(:,1:2)*10^6;

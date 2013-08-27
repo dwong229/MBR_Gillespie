@@ -1,13 +1,17 @@
 function intersect = check_line_intersection(posn,celldist,l)
 
-%MRB_CELL_DISTRIBUTION randomly determines the position of NUMCELL on and
-%mbr of shape defined by corners.
+%CHECK_LINE_INTERSECTION(plot,celldist,l) given posn and cell distribution
+%and cell length, determines if lines intersect
 %
 % INPUTS: 
 % POSN: [X1 Y1 angle(360)]
 % 
 % CELLDIST : (SIZE: n x 3)
 intersect = 0;
+
+% 
+troubleshoot = false;
+
 if sum(celldist(:)) == 0
     % this is the first line placed
     % no intersections
@@ -29,12 +33,20 @@ else
     
     % find intersections
     i = 1;
-    plot([posn(1), posnend(1)],[posn(2),posnend(2)],'-r');
-    hold on
-    h1 = plot([celldist(1,1), cellend(1,1)],[celldist(1,2),cellend(1,2)],'-k');
-    axis equal
+    
+    if troubleshoot
+        plot([posn(1), posnend(1)],[posn(2),posnend(2)],'-r');
+        hold on
+        h1 = plot([celldist(1,1), cellend(1,1)],[celldist(1,2),cellend(1,2)],'-k');
+        axis equal
+    end
+    
     while intersect == 0 && i <= numcell
-        set(h1,'XData',[celldist(i,1), cellend(i,1)],'YData',[celldist(i,2),cellend(i,2)]);
+        
+        if troubleshoot        
+            set(h1,'XData',[celldist(i,1), cellend(i,1)],'YData',[celldist(i,2),cellend(i,2)]);
+        end
+        
         detxytemp = det([celldist(i,1:2);cellend(i,1:2)]);
         detxtemp = det([celldist(i,1) 1;cellend(i,1) 1]);
         detytemp = det([celldist(i,2) 1;cellend(i,2) 1]);
@@ -54,5 +66,5 @@ else
         i = i+1;
         
     end
-    close all
+    %close all
 end

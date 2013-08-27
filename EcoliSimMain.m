@@ -5,7 +5,7 @@ close all
 simMode = 5; %1: one simulation, 2: repetition
 % 6: repetition of 4
 %%%%%%%%
-repeatSim = 100;
+repeatSim = 40;
 
 simIterations = 1000;
 
@@ -217,23 +217,24 @@ switch simMode
         MBRcorners.nocells = [-10 -10;10 20];
         
         %% Square
-        MBRcorners.cells(:,1) = [-20;20]; %x coordinates
-        MBRcorners.cells(:,2) = [-20;20]; %y coordinates
-        MBRcorners.nocells = [];
+        %MBRcorners.cells(:,1) = [-20;20]; %x coordinates
+        %MBRcorners.cells(:,2) = [-20;20]; %y coordinates
+        %MBRcorners.nocells = [];
         
         %%  Meters to micrometers
-        MBRcorners.cells = MBRcorners.cells*10^-6;
-        MBRcorners.nocells = MBRcorners.nocells*10^-6;
+        %MBRcorners.cells = MBRcorners.cells*10^-6;
+        %MBRcorners.nocells = MBRcorners.nocells*10^-6;
+        
         %% 
-        cellposnfile = 'cellposn400cells.mat';
+        %cellposnfile = 'cellposn400cells.mat';
         %cellposnfile = 'cellposnU_200cells_trans.mat';
-        %cellposnfile = [];
+        cellposnfile = [];
         if exist(cellposnfile,'file') == 2
             disp('Loading cell-position file')
             load(cellposnfile)
         else
             disp('Generating cell-positions')
-            cellposn = mbr_cell_distribution(MBRcorners,numcell,celllength);
+            cellposn = mbr_cell_distribution(MBRcorners,numcell,celllength,1);
         end
         
         [timeVec,state] =  MBR_gillespie_func(rxnrate,init,simIterations,attractant,MBRcorners,cellposn);
@@ -267,34 +268,37 @@ switch simMode
         [rtRatio,dtheta,dx] = eval_MBR_gillespie(timeVec,state,simTime)
         % make a movie to simulate mbr state:
         MBRmovie(timeVec,state)
+        [rtRatio,dtheta,dx] = eval_MBR_gillespie(timeVec,state,simTime);
         
     case 6
         disp('Running Repetition of MBR Simulation')
         
         attractant = @(x) 0;
            
-        fixedcellposn = true;
+        fixedcellposn = false;
         
         if fixedcellposn
             disp('Generate a single distribution and observe variability')
             %Initiate cells on MBR
             numcell = 400;
             celllength = 3; %um
-            MBRcorners = zeros(5,2);
-            MBRcorners(:,1) = [-20 -20 20 20 -20];
-            MBRcorners(:,2) = [-20 20 20 -20 -20];
+            MBRcorners.cells = [-20 -20;20 20];
+            MBRcorners.nocells = [];
             
             cellposnfile = 'cellposn400cells.mat';
+            %cellposnfile = [];
             if exist(cellposnfile,'file') == 2
                disp('Loading cell-position file')
                 load(cellposnfile)
             else
                 disp('Generating cell-positions')
-                 cellposn = mbr_cell_distribution(MBRcorners,numcell,celllength);
+                cellposn = mbr_cell_distribution(MBRcorners,numcell,celllength);
                  
             end
         else
             cellposn = [];
+            MBRcorners.cells = [-20 -20;20 20];
+            MBRcorners.nocells = [];
         end
         
         
@@ -305,13 +309,13 @@ switch simMode
             
             % run simulation
             init = [I A AA AAp YY YYp Mot Run];
-            
-            [timeVec,state] =  MBR_gillespie_func(rxnrate,init,simIterations,attractant,cellposn);
+            cellposn = [];
+            [timeVec,state] =  MBR_gillespie_func(rxnrate,init,simIterations,attractant,MBRcorners,cellposn);
             
             % compute stats
             if rep == 1
                 %simTime = floor(timeVec(end)*0.75);
-                simTime = timeVec(end)*0.75;
+                simTime = timeVec(end)*0.90;
                 fprintf('simTime = %4.4f \n',simTime)
                 %simTime = 10; % 10 second simulation time.
             end
@@ -329,6 +333,17 @@ switch simMode
         title('Histogram of angular velocity ratio')
         xlabel('angular velocity')
         ylabel('frequency')
+        
+        CCWcount = sum(stats.dtheta(:)>0);
+        CWcount =  sum(stats.dtheta(:)<0);
+        fprintf('CW : CCW = %3.0d : %3.0d \n',CWcount,CCWcount)
+        
+        meandtheta = mean(stats.dtheta(:));
+        sddtheta = std(stats.dtheta(:));
+        
+        fprintf('Mean : %5.2f  deg/s \n  SD : %5.2f deg/s \n',meandtheta,sddtheta)
+                
+        
         
 %         figure
 %         for i = 1:size(stats.dx,1)

@@ -39,6 +39,10 @@ function [] = MBRmovie(timeVec, state)
     mbrCorners = diagl*[cosd(cornerTh) sind(cornerTh)] + repmat([x(1),y(1)],[4,1]);
     mbrCorners = [mbrCorners;mbrCorners(1,:)];
     
+    % convert from um to m:
+    %mbrCorners = mbrCorners * 10^-6;
+    celllength = 3;
+    
     mbrsq = line(mbrCorners(:,1),mbrCorners(:,2));
     set(mbrsq,'color',[0 0 0]);
         
@@ -47,7 +51,7 @@ function [] = MBRmovie(timeVec, state)
     bacHead = rotationMatrix * state.cellposn(:,1:2)';
     bacHead = bacHead';
     cellAngle = state.cellAngle + repmat(th,[1,numcell]); % in world frame
-    dbac = 10*[cosd(cellAngle(1,:))' sind(cellAngle(1,:))'];
+    dbac = celllength*[cosd(cellAngle(1,:))' sind(cellAngle(1,:))'];
     bacTail = bacHead + dbac;
         
     % plot cells
@@ -105,7 +109,7 @@ function [] = MBRmovie(timeVec, state)
         bacHead = rotationMatrix * state.cellposn(:,1:2)';
         bacHead = bacHead' + repmat([xNow,yNow],[numcell,1]);
         
-        dbac = 10*[cosd(cellAngle(i,:)+thRate*(timeCurrent-timeVec(i)))' sind(cellAngle(i,:)+thRate*(timeCurrent-timeVec(i)))'];
+        dbac = celllength*[cosd(cellAngle(i,:)+thRate*(timeCurrent-timeVec(i)))' sind(cellAngle(i,:)+thRate*(timeCurrent-timeVec(i)))'];
 
         
         bacTail = bacHead - dbac;
