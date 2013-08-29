@@ -31,9 +31,10 @@ tumbleconstant = 0; %[Nm] CCW>0, CW<0
 kt = 1; % p/kt
 kr = 1;
 p = 0.41e-12; %pN from lit
-p = 0;
+
 q = 1.5e-15;  %10^-15N = 10^-3pN from IROS submission 2013
 q = 615e-12/10;
+
 
 % convert p and q to up and uq
 %p = p*1e6;
@@ -46,14 +47,20 @@ VdragTrans = 10e-6; %m/s,
 kt = FdragTrans/VdragTrans; % units kg/s
 
 %E EB's rotation COMSOL for sq.
-FdragRot = 2.46e-14; %Nm, torque on bottom, F*d EB comsol 10^-14Nm, 10^-2 pNm
+%FdragRot = 2.46e-14; %Nm, torque on bottom, F*d EB comsol 10^-14Nm, 10^-2 pNm
+FdragRot = 2.4e-17; %Nm, DW back of envelope based on translation 
+VdragRot = 10; %deg/s
 %uFdragRot = FdragRot * (1e12);
-VdragRot = rad2deg(0.016); %rad/s
+%VdragRot = rad2deg(0.016); %rad/s
 
 kr = FdragRot/VdragRot; % kg m^2/s
 
 % convert to um
-kr = kr*10^6;
+kr = kr * 10^6;
+
+
+%% compute q force based on torque and number of edge cells
+q = FdragRot/14.1e-6/10
 
 %Initiate cells on MBR (default)
 celllength = 3; %um

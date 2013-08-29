@@ -212,14 +212,14 @@ switch simMode
         MBRcorners = struct('cells',zeros(2,2),'nocells',[]);
         
         %% U
+%         MBRcorners.cells(:,1) = [-20;20]; %x coordinates
+%         MBRcorners.cells(:,2) = [-20;20]; %y coordinates
+%         MBRcorners.nocells = [-10 -10;10 20];
+%         
+        %% Square
         MBRcorners.cells(:,1) = [-20;20]; %x coordinates
         MBRcorners.cells(:,2) = [-20;20]; %y coordinates
-        MBRcorners.nocells = [-10 -10;10 20];
-        
-        %% Square
-        %MBRcorners.cells(:,1) = [-20;20]; %x coordinates
-        %MBRcorners.cells(:,2) = [-20;20]; %y coordinates
-        %MBRcorners.nocells = [];
+        MBRcorners.nocells = [];
         
         %%  Meters to micrometers
         %MBRcorners.cells = MBRcorners.cells*10^-6;
@@ -280,7 +280,7 @@ switch simMode
         if fixedcellposn
             disp('Generate a single distribution and observe variability')
             %Initiate cells on MBR
-            numcell = 400;
+            numcell = 200;
             celllength = 3; %um
             MBRcorners.cells = [-20 -20;20 20];
             MBRcorners.nocells = [];
