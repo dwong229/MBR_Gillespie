@@ -1,15 +1,15 @@
 function [timeVec,MBRstate]= MBR_gillespie_func(rxnrate,init,simIterations,attractant,MBRcorners,varargin)
 % Used in EcoliSimMain to run n-independent Gillespie simulations for cells
-% adhered to an MBR.  
-% ----- Inputs 
+% adhered to an MBR.
+% ----- Inputs
 %       - reaction rates, rxnrate - vector a reaction rates in cell
-%       - intial state of chemicals in each cell (same) 
+%       - intial state of chemicals in each cell (same)
 %       - number os simulation Iterations, simIterations (time will be
 %       equalized in post processing when comparing multiple simulations
 %       - attractant function that results in change in reaction rates
 
 % ----- Outputs
-%       - timeVec representing when the reactions occur 
+%       - timeVec representing when the reactions occur
 %       - MBRstate vector with information on state of MBR corresponding to the
 %       timeVec.
 
@@ -24,7 +24,7 @@ else
 end
 
 % tumble torque
-tumbleconstant = 0; %[Nm] CCW>0, CW<0 
+tumbleconstant = 0; %[Nm] CCW>0, CW<0
 %Tumble constant should be positive, so that it exerts CCW torque on MBR
 %update MBR state
 % viscosity constants
@@ -42,13 +42,13 @@ q = 615e-12/10;
 
 % EBS's tranlating U COMSOL
 FdragTrans = 7e-12; %N = kg m/s^2 (7pN)
-VdragTrans = 10e-6; %m/s, 
+VdragTrans = 10e-6; %m/s,
 
 kt = FdragTrans/VdragTrans; % units kg/s
 
 %E EB's rotation COMSOL for sq.
 %FdragRot = 2.46e-14; %Nm, torque on bottom, F*d EB comsol 10^-14Nm, 10^-2 pNm
-FdragRot = 2.4e-17; %Nm, DW back of envelope based on translation 
+FdragRot = 2.4e-17; %Nm, DW back of envelope based on translation
 VdragRot = 10; %deg/s
 %uFdragRot = FdragRot * (1e12);
 %VdragRot = rad2deg(0.016); %rad/s
@@ -60,7 +60,8 @@ kr = kr * 10^6;
 
 
 %% compute q force based on torque and number of edge cells
-q = FdragRot/14.1e-6/10
+q = FdragRot/14.1e-6/10;
+q = 0;
 
 %Initiate cells on MBR (default)
 celllength = 3; %um
@@ -90,47 +91,49 @@ MBRstate.F = ones(1,numcell);
 
 %% Determine if the bacterium hangs over the edge of microstructure
 % determine edge bacteria
-%edgecell = zeros(1,numcell); % store 1 if edge bacterium 
+%edgecell = zeros(1,numcell); % store 1 if edge bacterium
 
 [edgecell,bacHead,bacTail] = find_edge_bacteria(MBRcorners.cells,MBRcorners.nocells,MBRstate.cellposn,celllength);
 %% test correct edge detection
 if false
-flagella1 = figure;
-x1 = MBRcorners.cells(1,1);
-y1 = MBRcorners.cells(1,2);
-x2 = MBRcorners.cells(2,1);
-y2 = MBRcorners.cells(2,2);
-
-cornerallpts(:,1) = [x1,x2,x2,x1,x1];
-cornerallpts(:,2) = [y1,y1,y2,y2,y1];
-
-plot(cornerallpts(:,1),cornerallpts(:,2),'-k')
-
-for cell = 1:numcell
-    % determine if it is in the MBR
-    hold on
-    bacX = [bacHead(cell,1);bacTail(cell,1)];
-    bacY = [bacHead(cell,2);bacTail(cell,2)];
-    hold on
-    if edgecell(cell)
-       % OVER EDGE IN RED
-        cellplot(cell) = plot(bacX,bacY,'-r','LineWidth',5);
-    else
-       cellplot(cell) = plot(bacX,bacY,'-b','LineWidth',5);
+    flagella1 = figure;
+    x1 = MBRcorners.cells(1,1);
+    y1 = MBRcorners.cells(1,2);
+    x2 = MBRcorners.cells(2,1);
+    y2 = MBRcorners.cells(2,2);
+    
+    cornerallpts(:,1) = [x1,x2,x2,x1,x1];
+    cornerallpts(:,2) = [y1,y1,y2,y2,y1];
+    
+    plot(cornerallpts(:,1),cornerallpts(:,2),'-k')
+    
+    for cell = 1:numcell
+        % determine if it is in the MBR
+        hold on
+        bacX = [bacHead(cell,1);bacTail(cell,1)];
+        bacY = [bacHead(cell,2);bacTail(cell,2)];
+        hold on
+        if edgecell(cell)
+            % OVER EDGE IN RED
+            cellplot(cell) = plot(bacX,bacY,'-r','LineWidth',5);
+        else
+            cellplot(cell) = plot(bacX,bacY,'-b','LineWidth',5);
+        end
     end
-end
-axis equal
-
-th = MBRstate.cellposn(:,3);
-dxNormal = cosd(th);
-dyNormal = sind(th);
-quiver(MBRstate.cellposn(1:numcell,1), MBRstate.cellposn(1:numcell,2),dxNormal,dyNormal);
-
-thTangent = edgecell.* MBRstate.cellposn(:,3);
-dxTangent = sind(thTangent);
-dyTangent = -cosd(thTangent);
-quiver(MBRstate.cellposn(edgecell==1,1), MBRstate.cellposn(edgecell==1,2),dxTangent(edgecell==1),dyTangent(edgecell==1));
-keyboard
+    axis equal
+    
+    % propulsion force
+    th = MBRstate.cellposn(:,3);
+    dxNormal = -cosd(th);
+    dyNormal = -sind(th);
+    quiver(MBRstate.cellposn(1:numcell,1), MBRstate.cellposn(1:numcell,2),dxNormal,dyNormal);
+    
+    % side force
+    thTangent = edgecell.* MBRstate.cellposn(:,3);
+    dxTangent = sind(thTangent);
+    dyTangent = -cosd(thTangent);
+    quiver(MBRstate.cellposn(edgecell==1,1), MBRstate.cellposn(edgecell==1,2),dxTangent(edgecell==1),dyTangent(edgecell==1));
+    keyboard
 end
 
 %% generate a time and rxn for each cell
@@ -153,7 +156,7 @@ if troubleshoot
     dxdtvec = 0;
     dydtvec = 0;
     dadtvec = 0;
-        
+    
     subplot(2,1,1)
     hforcexf = plot([1],[0],'xb');
     hold on
@@ -168,7 +171,7 @@ if troubleshoot
     ylabel('Angular Velocity')
     
 end
-    
+
 %disp('MBR simulation started')
 
 % initialize cellAngles
@@ -189,7 +192,7 @@ for i = 2:simIterations
     % update nextRxnTime for rxncell(i)
     [tau,newcellchem,~] = cell_gillespie(timeVec,rxnrate,cellstate(i,:,rxncell(i)),'MBR');
     
-    nextRxnTime(:,rxncell(i)) = [timeVec(i) + tau;newcellchem];    
+    nextRxnTime(:,rxncell(i)) = [timeVec(i) + tau;newcellchem];
     
     bx = MBRstate.cellposn(:,1);
     by = MBRstate.cellposn(:,2);
@@ -203,19 +206,19 @@ for i = 2:simIterations
     % no side force
     %dxdt_f = kt*sum(Fnow.*cosd(th)) ; %mbr frame
     %dydt_f = kt*sum(Fnow.*sind(th)); %mbr frame
-    %numtumblecells = sum(Fnow==0);   
+    %numtumblecells = sum(Fnow==0);
     %dadt_f = kr*sum(bx.*Fnow.*sind(th) + by.*Fnow.*cosd(th)) - tumbleconstant*numtumblecells;
-       
-    % with side force
-    dxdt_f = 1/kt*(p*sum(Fnow.*cosd(th)) - q*sum(Fnow.*edgecell.*sind(th))); %mbr frame
-    dydt_f = 1/kt*(p*sum(Fnow.*sind(th)) + q*sum(Fnow.*edgecell.*cosd(th))); %mbr frame
     
-    numtumblecells = sum(Fnow==0);   
-    dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p + by.*Fnow.*cosd(th)*p + bx.*Fnow.*cosd(th)*q - by.*Fnow.*sind(th)*q) + tumbleconstant*numtumblecells);
+    % with side force
+    dxdt_f = 1/kt*(-p*sum(Fnow.*cosd(th)) + q*sum(Fnow.*edgecell.*sind(th))); %mbr frame
+    dydt_f = 1/kt*(-p*sum(Fnow.*sind(th)) - q*sum(Fnow.*edgecell.*cosd(th))); %mbr frame
+    
+    numtumblecells = sum(Fnow==0);
+    dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p + by.*Fnow.*cosd(th)*p - bx.*Fnow.*cosd(th)*q - by.*Fnow.*sind(th)*q) + tumbleconstant*numtumblecells);
     
     % in world-fixed frame
     dxdt = (dxdt_f)*cosd(MBRstate.posn(i-1,3)) - dydt_f*sind(MBRstate.posn(i-1,3));
-    dydt = (dxdt_f)*sind(MBRstate.posn(i-1,3)) + dydt_f*cosd(MBRstate.posn(i-1,3));    
+    dydt = (dxdt_f)*sind(MBRstate.posn(i-1,3)) + dydt_f*cosd(MBRstate.posn(i-1,3));
     dadt = dadt_f;
     
     if troubleshoot
@@ -234,9 +237,9 @@ for i = 2:simIterations
         set(hforcexf,'XData',frame,'YData',dxdt_fvec);
         set(hforceyf,'XData',frame,'YData',dydt_fvec);
         set(hforcea,'XData',frame,'YData',dadt_fvec);
-    
+        keyboard
     end
-            
+    
     % update position of MBR
     dt = timeVec(i) - timeVec(i-1);
     MBRstate.posn(i,:) = MBRstate.posn(i-1,:) + dt*[dxdt dydt dadt];

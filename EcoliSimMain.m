@@ -2,10 +2,10 @@
 clear
 close all
 %%%%%%%%
-simMode = 5; %1: one simulation, 2: repetition
+simMode = 6; %1: one simulation, 2: repetition
 % 6: repetition of 4
 %%%%%%%%
-repeatSim = 40;
+repeatSim = 100;
 
 simIterations = 1000;
 
@@ -212,14 +212,14 @@ switch simMode
         MBRcorners = struct('cells',zeros(2,2),'nocells',[]);
         
         %% U
-%         MBRcorners.cells(:,1) = [-20;20]; %x coordinates
-%         MBRcorners.cells(:,2) = [-20;20]; %y coordinates
-%         MBRcorners.nocells = [-10 -10;10 20];
-%         
-        %% Square
         MBRcorners.cells(:,1) = [-20;20]; %x coordinates
         MBRcorners.cells(:,2) = [-20;20]; %y coordinates
-        MBRcorners.nocells = [];
+        MBRcorners.nocells = [-10 -10;10 20];
+        
+        %% Square
+%         MBRcorners.cells(:,1) = [-20;20]; %x coordinates
+%         MBRcorners.cells(:,2) = [-20;20]; %y coordinates
+%         MBRcorners.nocells = [];
         
         %%  Meters to micrometers
         %MBRcorners.cells = MBRcorners.cells*10^-6;
@@ -228,6 +228,8 @@ switch simMode
         %% 
         %cellposnfile = 'cellposn400cells.mat';
         %cellposnfile = 'cellposnU_200cells_trans.mat';
+        %cellposnfile = 'cellposn0angle.mat';
+        %cellposnfile = 'cellposnborder.mat';
         cellposnfile = [];
         if exist(cellposnfile,'file') == 2
             disp('Loading cell-position file')
@@ -268,7 +270,6 @@ switch simMode
         [rtRatio,dtheta,dx] = eval_MBR_gillespie(timeVec,state,simTime)
         % make a movie to simulate mbr state:
         MBRmovie(timeVec,state)
-        [rtRatio,dtheta,dx] = eval_MBR_gillespie(timeVec,state,simTime);
         
     case 6
         disp('Running Repetition of MBR Simulation')

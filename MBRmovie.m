@@ -112,7 +112,7 @@ function [] = MBRmovie(timeVec, state)
         dbac = celllength*[cosd(cellAngle(i,:)+thRate*(timeCurrent-timeVec(i)))' sind(cellAngle(i,:)+thRate*(timeCurrent-timeVec(i)))'];
 
         
-        bacTail = bacHead - dbac;
+        bacTail = bacHead + dbac;
         
         % plot cells
         for j = 1:size(state.cellposn,1)
