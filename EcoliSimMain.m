@@ -2,10 +2,10 @@
 clear
 close all
 %%%%%%%%
-simMode = 6; %1: one simulation, 2: repetition
+simMode = 5; %1: one simulation, 2: repetition
 % 6: repetition of 4
 %%%%%%%%
-repeatSim = 100;
+repeatSim = 10;
 
 simIterations = 1000;
 
@@ -208,18 +208,25 @@ switch simMode
         
         %Initiate cells on MBR
         numcell = 200;
-        celllength = 3; %um
+        celllength = 10; %um
         MBRcorners = struct('cells',zeros(2,2),'nocells',[]);
         
-        %% U
+        %% U 40x 40
         MBRcorners.cells(:,1) = [-20;20]; %x coordinates
         MBRcorners.cells(:,2) = [-20;20]; %y coordinates
         MBRcorners.nocells = [-10 -10;10 20];
         
-        %% Square
-%         MBRcorners.cells(:,1) = [-20;20]; %x coordinates
-%         MBRcorners.cells(:,2) = [-20;20]; %y coordinates
-%         MBRcorners.nocells = [];
+        %% Square 40 x 40
+        MBRcorners.cells(:,1) = [-20;20]; %x coordinates
+        MBRcorners.cells(:,2) = [-20;20]; %y coordinates
+        MBRcorners.nocells = [];
+        
+        %% H 60 x 60
+        MBRcorners.cells(:,1) = [-30;30]; %x coordinates
+        MBRcorners.cells(:,2) = [-30;30]; %y coordinates
+       
+        %MBRcorners.nocells = [-10 10;10 30;-10 -30;10 -10];
+        MBRcorners.nocells = [-12 8;12 30;-12 -30;12 -8];
         
         %%  Meters to micrometers
         %MBRcorners.cells = MBRcorners.cells*10^-6;
@@ -230,7 +237,8 @@ switch simMode
         %cellposnfile = 'cellposnU_200cells_trans.mat';
         %cellposnfile = 'cellposn0angle.mat';
         %cellposnfile = 'cellposnborder.mat';
-        cellposnfile = [];
+        cellposnfile = 'headangle_data_2H_40X.mat';
+        %cellposnfile = [];
         if exist(cellposnfile,'file') == 2
             disp('Loading cell-position file')
             load(cellposnfile)
@@ -276,7 +284,7 @@ switch simMode
         
         attractant = @(x) 0;
            
-        fixedcellposn = false;
+        fixedcellposn = true;
         
         if fixedcellposn
             disp('Generate a single distribution and observe variability')
@@ -287,6 +295,7 @@ switch simMode
             MBRcorners.nocells = [];
             
             cellposnfile = 'cellposn400cells.mat';
+            cellposnfile = 'cellposnborder.mat';
             %cellposnfile = [];
             if exist(cellposnfile,'file') == 2
                disp('Loading cell-position file')

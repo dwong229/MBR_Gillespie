@@ -13,18 +13,21 @@ function [timeVec,MBRstate]= MBR_gillespie_func(rxnrate,init,simIterations,attra
 %       - MBRstate vector with information on state of MBR corresponding to the
 %       timeVec.
 
-MBRstate = struct('posn',[0 0 360*rand(1)],'cellposn',[],'F',[]); %in fixed/world frame
+%MBRstate = struct('posn',[0 0 360*rand(1)],'cellposn',[],'F',[]); %in fixed/world frame
+MBRstate = struct('posn',[0 0 70],'cellposn',[],'F',[]); %in fixed/world frame
 
 % varargin for cell distribution provided
 if nargin == 6 && ~isempty(varargin{1})
     MBRstate.cellposn = varargin{1};
+    
 else
     MBRstate.cellposn = [];
     numcell = 200;
 end
 
 % tumble torque
-tumbleconstant = 0; %[Nm] CCW>0, CW<0
+tumbleconstant = 1e-9; %[Nm] CCW>0, CW<0
+%tumbleconstant = 0; %[Nm] CCW>0, CW<0
 %Tumble constant should be positive, so that it exerts CCW torque on MBR
 %update MBR state
 % viscosity constants
@@ -34,7 +37,6 @@ p = 0.41e-12; %pN from lit
 
 q = 1.5e-15;  %10^-15N = 10^-3pN from IROS submission 2013
 q = 615e-12/10;
-
 
 % convert p and q to up and uq
 %p = p*1e6;
@@ -46,25 +48,27 @@ VdragTrans = 10e-6; %m/s,
 
 kt = FdragTrans/VdragTrans; % units kg/s
 
+%% 
 %E EB's rotation COMSOL for sq.
 %FdragRot = 2.46e-14; %Nm, torque on bottom, F*d EB comsol 10^-14Nm, 10^-2 pNm
-FdragRot = 2.4e-17; %Nm, DW back of envelope based on translation
+%FdragRot = 2.4e-17; %Nm, DW back of envelope based on translation
+
+%% new model
+FdragRot = 8.03e-13; % N from NEW COMSOL 
 VdragRot = 10; %deg/s
+kr = FdragRot*30e-6/deg2rad(VdragRot); % kg m^2/s 
+%% compute q force based on torque and number of edge cells
+q = FdragRot/10;
+
+%%
 %uFdragRot = FdragRot * (1e12);
 %VdragRot = rad2deg(0.016); %rad/s
-
-kr = FdragRot/VdragRot; % kg m^2/s
-
+%kr = FdragRot/VdragRot; % kg m^2/s 
 % convert to um
 kr = kr * 10^6;
 
-
-%% compute q force based on torque and number of edge cells
-q = FdragRot/14.1e-6/10;
-q = 0;
-
 %Initiate cells on MBR (default)
-celllength = 3; %um
+celllength = 10; %um
 
 %initialize variables
 timeVec(1) = 0;
@@ -95,7 +99,7 @@ MBRstate.F = ones(1,numcell);
 
 [edgecell,bacHead,bacTail] = find_edge_bacteria(MBRcorners.cells,MBRcorners.nocells,MBRstate.cellposn,celllength);
 %% test correct edge detection
-if false
+if true
     flagella1 = figure;
     x1 = MBRcorners.cells(1,1);
     y1 = MBRcorners.cells(1,2);
