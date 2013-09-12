@@ -26,8 +26,9 @@ else
 end
 
 % tumble torque
-tumbleconstant = 1e-9; %[Nm] CCW>0, CW<0
-%tumbleconstant = 0; %[Nm] CCW>0, CW<0
+%tumbleconstant = 1e-9; %[Nm] CCW>0, CW<0
+
+tumbleconstant = 0; %[Nm] CCW>0, CW<0
 %Tumble constant should be positive, so that it exerts CCW torque on MBR
 %update MBR state
 % viscosity constants
@@ -46,7 +47,7 @@ q = 615e-12/10;
 FdragTrans = 7e-12; %N = kg m/s^2 (7pN)
 VdragTrans = 10e-6; %m/s,
 
-kt = FdragTrans/VdragTrans; % units kg/s
+kt = FdragTrans/VdragTrans % units kg/s
 
 %% 
 %E EB's rotation COMSOL for sq.
@@ -56,7 +57,8 @@ kt = FdragTrans/VdragTrans; % units kg/s
 %% new model
 FdragRot = 8.03e-13; % N from NEW COMSOL 
 VdragRot = 10; %deg/s
-kr = FdragRot*30e-6/deg2rad(VdragRot); % kg m^2/s 
+%kr = FdragRot*30e-6/deg2rad(VdragRot) % kg m^2/s 
+kr = FdragRot*30e-6/VdragRot
 %% compute q force based on torque and number of edge cells
 q = FdragRot/10;
 

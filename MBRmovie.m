@@ -27,10 +27,11 @@ function [] = MBRmovie(timeVec, state)
     
     % create movie figure
     mov1 = figure;
-    axis([-50 100 -100 50])
+    
+    %axis([-50 100 -100 50])
 
-    %buffer = 50;
-    %axis([xLimits(1) - buffer, xLimits(2) + buffer,yLimits(1) - buffer, yLimits(2) + buffer])
+    buffer = 50;
+    axis([xLimits(1) - buffer, xLimits(2) + buffer,yLimits(1) - buffer, yLimits(2) + buffer])
     axis equal
     axis manual
     % plot first frame

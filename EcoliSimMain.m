@@ -7,7 +7,7 @@ simMode = 5; %1: one simulation, 2: repetition
 %%%%%%%%
 repeatSim = 100;
 
-simIterations = 200;
+simIterations = 1000;
 
 %% simulation parameters
 delta = 0; % A -> I   reduced ligand detected
@@ -243,6 +243,7 @@ switch simMode
         %cellposnfile = 'cellposnU_200cells_trans.mat';
         %cellposnfile = 'cellposn0angle.mat';
         %cellposnfile = 'cellposnborder.mat';
+        
         cellposnfile = 'headangle_data_2H_40X.mat';
         %cellposnfile = 'headangle_data_H3.mat';
         %cellposnfile = 'headangle_data_H3reverse.mat';
