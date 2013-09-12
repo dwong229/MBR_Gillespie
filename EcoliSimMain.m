@@ -2,12 +2,12 @@
 clear
 close all
 %%%%%%%%
-simMode = 6; %1: one simulation, 2: repetition
+simMode = 5; %1: one simulation, 2: repetition
 % 6: repetition of 4
 %%%%%%%%
 repeatSim = 100;
 
-simIterations = 100;
+simIterations = 200;
 
 %% simulation parameters
 delta = 0; % A -> I   reduced ligand detected
@@ -222,11 +222,17 @@ switch simMode
         MBRcorners.nocells = [];
         
         %% H 60 x 60
+        %MBRcorners.cells(:,1) = [-30;30]; %x coordinates
+        %MBRcorners.cells(:,2) = [-30;30]; %y coordinates
+       
+        MBRcorners.nocells = [-10 10;10 30;-10 -30;10 -10];
+        
+        %translating H 
         MBRcorners.cells(:,1) = [-30;30]; %x coordinates
         MBRcorners.cells(:,2) = [-30;30]; %y coordinates
-       
-        %MBRcorners.nocells = [-10 10;10 30;-10 -30;10 -10];
-        MBRcorners.nocells = [-12 8;12 30;-12 -30;12 -8];
+        
+        MBRcorners.nocells = [-18 8;13 30;...
+            -12 -30;13 -5];
         
         %%  Meters to micrometers
         %MBRcorners.cells = MBRcorners.cells*10^-6;
@@ -238,7 +244,7 @@ switch simMode
         %cellposnfile = 'cellposn0angle.mat';
         %cellposnfile = 'cellposnborder.mat';
         cellposnfile = 'headangle_data_2H_40X.mat';
-        cellposnfile = 'headangle_data_H3.mat';
+        %cellposnfile = 'headangle_data_H3.mat';
         %cellposnfile = 'headangle_data_H3reverse.mat';
 
         %cellposnfile = [];

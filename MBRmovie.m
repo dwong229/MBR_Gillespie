@@ -27,15 +27,20 @@ function [] = MBRmovie(timeVec, state)
     
     % create movie figure
     mov1 = figure;
-    buffer = 50;
-    axis([xLimits(1) - buffer, xLimits(2) + buffer,yLimits(1) - buffer, yLimits(2) + buffer])
+    axis([-50 100 -100 50])
+
+    %buffer = 50;
+    %axis([xLimits(1) - buffer, xLimits(2) + buffer,yLimits(1) - buffer, yLimits(2) + buffer])
     axis equal
     axis manual
     % plot first frame
     % plot MBR
     diagl = sqrt(20^2 + 20^2);
+    diagl = sqrt(30^2 + 30^2);
     cornerTh = [45:90:360]'+th(1);
    
+    
+    
     mbrCorners = diagl*[cosd(cornerTh) sind(cornerTh)] + repmat([x(1),y(1)],[4,1]);
     mbrCorners = [mbrCorners;mbrCorners(1,:)];
     
@@ -62,9 +67,11 @@ function [] = MBRmovie(timeVec, state)
         cellplot(j) = plot(bacX,bacY,'-b','LineWidth',2);
     end
     
-    htime =  text(xLimits(2),yLimits(2),sprintf('Time = %.2f s',timeVec(1)),'horizontalAlignment','center');
+    %htime =  text(xLimits(2),yLimits(2),sprintf('Time = %.2f s',timeVec(1)),'horizontalAlignment','center');
+    htime =  text(40,40,sprintf('Time = %.2f s',timeVec(1)),'horizontalAlignment','center');
     
     hold on 
+    % plot trajectory
     plot(x,y,'-g')
     xlabel('X-coordinate')
     ylabel('Y-coordinate')
@@ -79,7 +86,12 @@ function [] = MBRmovie(timeVec, state)
     %for i = 2:length(timeVec)
     i = 1;
     timeCurrent = 0;
+    plot(x(1),y(1),'o','MarkerSize',5,'LineWidth',3,'Color','g')
+    plot(x(end),y(end),'o','MarkerSize',5,'LineWidth',3,'Color','r')
     while timeCurrent + timestep < timeVec(end)
+        
+                
+        
         % update timeCurrent
         timeCurrent = timeCurrent + timestep;
         
@@ -128,10 +140,10 @@ function [] = MBRmovie(timeVec, state)
                 set(cellplot(j),'Color','b','MarkerSize',3,'Marker','none')
             end
         end
-        
-        
+        axis([-50 100 -100 50])
+        %axis equal
+
         drawnow
-        
         
         frame = getframe(gcf);
         open(mbrViewObj)

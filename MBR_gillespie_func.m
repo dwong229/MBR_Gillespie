@@ -98,24 +98,45 @@ MBRstate.F = ones(1,numcell);
 %edgecell = zeros(1,numcell); % store 1 if edge bacterium
 
 [edgecell,bacHead,bacTail] = find_edge_bacteria(MBRcorners.cells,MBRcorners.nocells,MBRstate.cellposn,celllength);
+
+drawlength = 3;
+[~,~,bacTailDraw] = find_edge_bacteria(MBRcorners.cells,MBRcorners.nocells,MBRstate.cellposn,drawlength);
+
 %% test correct edge detection
-if false
+plotForceVec = false;
+if true
     flagella1 = figure;
+    
+    % draq sq
     x1 = MBRcorners.cells(1,1);
     y1 = MBRcorners.cells(1,2);
     x2 = MBRcorners.cells(2,1);
     y2 = MBRcorners.cells(2,2);
+   
+    %cornerallpts(:,1) = [x1,x2,x2,x1,x1];
+    %cornerallpts(:,2) = [y1,y1,y2,y2,y1];
     
-    cornerallpts(:,1) = [x1,x2,x2,x1,x1];
-    cornerallpts(:,2) = [y1,y1,y2,y2,y1];
+    % draw h
+    xmp = 18; %midpoint for H
+    ymp = 8;
+    cornerallpts(:,1) = [x1,-xmp, -xmp, xmp, xmp, x2,x2, xmp xmp -xmp -xmp x1,x1];
+    cornerallpts(:,2) = [y1, y1, -ymp, -ymp, y1,  y1,y2, y2, ymp, ymp, y2, y2,y1];
     
-    plot(cornerallpts(:,1),cornerallpts(:,2),'-k')
+    % draw h-Htranslating
+    xmp = 18; %midpoint for H
+    ymp = 9;
+    x2 = 25;
+    
+    cornerallpts(:,1) = [x1,-xmp, -xmp, xmp-5, xmp-5, x2,x2, xmp-5 xmp-5 -xmp -xmp x1,x1];
+    cornerallpts(:,2) = [y1, y1, -ymp, -ymp, y1,  y1,y2, y2, ymp, ymp, y2, y2,y1];
+    
+    plot(cornerallpts(:,1),cornerallpts(:,2),'-k','LineWidth',4)
     
     for cell = 1:numcell
         % determine if it is in the MBR
         hold on
-        bacX = [bacHead(cell,1);bacTail(cell,1)];
-        bacY = [bacHead(cell,2);bacTail(cell,2)];
+        bacX = [bacHead(cell,1);bacTailDraw(cell,1)];
+        bacY = [bacHead(cell,2);bacTailDraw(cell,2)];
         hold on
         if edgecell(cell)
             % OVER EDGE IN RED
@@ -125,19 +146,24 @@ if false
         end
     end
     axis equal
-    
-    % propulsion force
-    th = MBRstate.cellposn(:,3);
-    dxNormal = -cosd(th);
-    dyNormal = -sind(th);
-    quiver(MBRstate.cellposn(1:numcell,1), MBRstate.cellposn(1:numcell,2),dxNormal,dyNormal);
-    
-    % side force
-    thTangent = edgecell.* MBRstate.cellposn(:,3);
-    dxTangent = sind(thTangent);
-    dyTangent = -cosd(thTangent);
-    quiver(MBRstate.cellposn(edgecell==1,1), MBRstate.cellposn(edgecell==1,2),dxTangent(edgecell==1),dyTangent(edgecell==1));
+    plot(bacHead(:,1),bacHead(:,2),'.k')        
+    plot(bacHead(:,1),bacHead(:,2),'ok','MarkerSize',10)    
+    if plotForceVec
+        % propulsion force
+        th = MBRstate.cellposn(:,3);
+        dxNormal = -cosd(th);
+        dyNormal = -sind(th);
+        quiver(MBRstate.cellposn(1:numcell,1), MBRstate.cellposn(1:numcell,2),dxNormal,dyNormal);
+        
+        % side force
+        thTangent = edgecell.* MBRstate.cellposn(:,3);
+        dxTangent = sind(thTangent);
+        dyTangent = -cosd(thTangent);
+        quiver(MBRstate.cellposn(edgecell==1,1), MBRstate.cellposn(edgecell==1,2),dxTangent(edgecell==1),dyTangent(edgecell==1));
+    end
+    print -dtiff 'CellDist'
     keyboard
+    
 end
 
 %% generate a time and rxn for each cell
