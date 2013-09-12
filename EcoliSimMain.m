@@ -2,12 +2,12 @@
 clear
 close all
 %%%%%%%%
-simMode = 5; %1: one simulation, 2: repetition
+simMode = 6; %1: one simulation, 2: repetition
 % 6: repetition of 4
 %%%%%%%%
-repeatSim = 10;
+repeatSim = 100;
 
-simIterations = 1000;
+simIterations = 100;
 
 %% simulation parameters
 delta = 0; % A -> I   reduced ligand detected
@@ -238,6 +238,9 @@ switch simMode
         %cellposnfile = 'cellposn0angle.mat';
         %cellposnfile = 'cellposnborder.mat';
         cellposnfile = 'headangle_data_2H_40X.mat';
+        cellposnfile = 'headangle_data_H3.mat';
+        %cellposnfile = 'headangle_data_H3reverse.mat';
+
         %cellposnfile = [];
         if exist(cellposnfile,'file') == 2
             disp('Loading cell-position file')
@@ -284,7 +287,7 @@ switch simMode
         
         attractant = @(x) 0;
            
-        fixedcellposn = true;
+        fixedcellposn = false;
         
         if fixedcellposn
             disp('Generate a single distribution and observe variability')
@@ -294,9 +297,9 @@ switch simMode
             MBRcorners.cells = [-20 -20;20 20];
             MBRcorners.nocells = [];
             
-            cellposnfile = 'cellposn400cells.mat';
-            cellposnfile = 'cellposnborder.mat';
-            %cellposnfile = [];
+            %cellposnfile = 'cellposn400cells.mat';
+            %cellposnfile = 'cellposnborder.mat';
+            cellposnfile = [];
             if exist(cellposnfile,'file') == 2
                disp('Loading cell-position file')
                 load(cellposnfile)

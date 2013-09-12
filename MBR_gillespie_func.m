@@ -99,7 +99,7 @@ MBRstate.F = ones(1,numcell);
 
 [edgecell,bacHead,bacTail] = find_edge_bacteria(MBRcorners.cells,MBRcorners.nocells,MBRstate.cellposn,celllength);
 %% test correct edge detection
-if true
+if false
     flagella1 = figure;
     x1 = MBRcorners.cells(1,1);
     y1 = MBRcorners.cells(1,2);
