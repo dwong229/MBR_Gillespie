@@ -31,20 +31,15 @@ end
 tumbleconstant = 0; %[Nm] CCW>0, CW<0
 %Tumble constant should be positive, so that it exerts CCW torque on MBR
 %update MBR state
-% viscosity constants
-kt = 1; % p/kt
-kr = 1;
 p = 0.41e-12; %pN from lit
-
-q = 1.5e-15;  %10^-15N = 10^-3pN from IROS submission 2013
-q = 615e-12/10;
 
 % convert p and q to up and uq
 %p = p*1e6;
 %q = q*1e6;
 
 % EBS's tranlating U COMSOL
-FdragTrans = 7e-12; %N = kg m/s^2 (7pN)
+%FdragTrans = 7e-12; %N = kg m/s^2 (7pN)
+FdragTrans = 1.50e-11;
 VdragTrans = 10e-6; %m/s,
 
 kt = FdragTrans/VdragTrans % units kg/s
@@ -55,12 +50,13 @@ kt = FdragTrans/VdragTrans % units kg/s
 %FdragRot = 2.4e-17; %Nm, DW back of envelope based on translation
 
 %% new model
-FdragRot = 8.03e-13; % N from NEW COMSOL 
+%FdragRot = 6.03e-13; % N from NEW COMSOL 
+FdragRot = 3.29e-13; % N from NEW COMSOL 
 VdragRot = 10; %deg/s
 %kr = FdragRot*30e-6/deg2rad(VdragRot) % kg m^2/s 
 kr = FdragRot*30e-6/VdragRot
 %% compute q force based on torque and number of edge cells
-q = FdragRot/10;
+q = FdragRot/5.5;
 
 %%
 %uFdragRot = FdragRot * (1e12);
@@ -106,7 +102,7 @@ drawlength = 3;
 
 %% test correct edge detection
 plotForceVec = false;
-if true
+if false
     flagella1 = figure;
     
     % draq sq
@@ -124,13 +120,14 @@ if true
     cornerallpts(:,1) = [x1,-xmp, -xmp, xmp, xmp, x2,x2, xmp xmp -xmp -xmp x1,x1];
     cornerallpts(:,2) = [y1, y1, -ymp, -ymp, y1,  y1,y2, y2, ymp, ymp, y2, y2,y1];
     
-    % draw h-Htranslating
-    xmp = 18; %midpoint for H
-    ymp = 9;
-    x2 = 25;
+    %% draw h-Htranslating
+    %xmp = 18; %midpoint for H
+    %ymp = 9;
+    %x2 = 25;
     
-    cornerallpts(:,1) = [x1,-xmp, -xmp, xmp-5, xmp-5, x2,x2, xmp-5 xmp-5 -xmp -xmp x1,x1];
-    cornerallpts(:,2) = [y1, y1, -ymp, -ymp, y1,  y1,y2, y2, ymp, ymp, y2, y2,y1];
+    %cornerallpts(:,1) = [x1,-xmp, -xmp, xmp-5, xmp-5, x2,x2, xmp-5 xmp-5 -xmp -xmp x1,x1];
+    %cornerallpts(:,2) = [y1, y1, -ymp, -ymp, y1,  y1,y2, y2, ymp, ymp, y2, y2,y1];
+    %%
     
     plot(cornerallpts(:,1),cornerallpts(:,2),'-k','LineWidth',4)
     
@@ -163,6 +160,7 @@ if true
         dyTangent = -cosd(thTangent);
         quiver(MBRstate.cellposn(edgecell==1,1), MBRstate.cellposn(edgecell==1,2),dxTangent(edgecell==1),dyTangent(edgecell==1));
     end
+    axis ij
     print -dtiff 'CellDist'
     keyboard
     

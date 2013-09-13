@@ -141,8 +141,7 @@ function [] = MBRmovie(timeVec, state)
                 set(cellplot(j),'Color','b','MarkerSize',3,'Marker','none')
             end
         end
-        axis([-50 100 -100 50])
-        %axis equal
+        axis equal
 
         drawnow
         
