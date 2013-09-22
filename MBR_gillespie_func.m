@@ -14,7 +14,8 @@ function [timeVec,MBRstate]= MBR_gillespie_func(rxnrate,init,simIterations,attra
 %       timeVec.
 
 %MBRstate = struct('posn',[0 0 360*rand(1)],'cellposn',[],'F',[]); %in fixed/world frame
-MBRstate = struct('posn',[0 0 70],'cellposn',[],'F',[]); %in fixed/world frame
+%MBRstate = struct('posn',[0 0 90-9],'cellposn',[],'F',[]); %in fixed/world frame
+MBRstate = struct('posn',[0 0 60],'cellposn',[],'F',[]); %in fixed/world frame
 
 % varargin for cell distribution provided
 if nargin == 6 && ~isempty(varargin{1})
@@ -31,18 +32,18 @@ end
 tumbleconstant = 0; %[Nm] CCW>0, CW<0
 %Tumble constant should be positive, so that it exerts CCW torque on MBR
 %update MBR state
-p = 0.41e-12; %pN from lit
-
+%p = 0.41e-12; %pN from lit
+p = 0.45e-12 %pN from lit
 % convert p and q to up and uq
 %p = p*1e6;
 %q = q*1e6;
 
 % EBS's tranlating U COMSOL
 %FdragTrans = 7e-12; %N = kg m/s^2 (7pN)
-FdragTrans = 1.50e-11;
+FdragTrans = 1.50e-11; %N
 VdragTrans = 10e-6; %m/s,
 
-kt = FdragTrans/VdragTrans % units kg/s
+kt = FdragTrans/VdragTrans % units Ns/m
 
 %% 
 %E EB's rotation COMSOL for sq.
@@ -52,18 +53,25 @@ kt = FdragTrans/VdragTrans % units kg/s
 %% new model
 %FdragRot = 6.03e-13; % N from NEW COMSOL 
 FdragRot = 3.29e-13; % N from NEW COMSOL 
-VdragRot = 10; %deg/s
+%VdragRot = 10; %deg/s
+VdragRot = rad2deg(0.016); %deg/s 0.016 rad / s
 %kr = FdragRot*30e-6/deg2rad(VdragRot) % kg m^2/s 
-kr = FdragRot*30e-6/VdragRot
+kr = FdragRot*30/VdragRot % N um s/deg
+
 %% compute q force based on torque and number of edge cells
-q = FdragRot/5.5;
+q = FdragRot  % trans
+
+% LEAST SQS P.Q
+p = .4804e-12
+q = -.8258e-12
+
+%p = .4804e-12
+%q = -.8258e-12
 
 %%
 %uFdragRot = FdragRot * (1e12);
 %VdragRot = rad2deg(0.016); %rad/s
 %kr = FdragRot/VdragRot; % kg m^2/s 
-% convert to um
-kr = kr * 10^6;
 
 %Initiate cells on MBR (default)
 celllength = 10; %um
@@ -102,6 +110,7 @@ drawlength = 3;
 
 %% test correct edge detection
 plotForceVec = false;
+
 if false
     flagella1 = figure;
     
@@ -200,6 +209,7 @@ if troubleshoot
     xlabel('FrameNumber')
     ylabel('Angular Velocity')
     
+    axis ij
 end
 
 %disp('MBR simulation started')
@@ -244,7 +254,7 @@ for i = 2:simIterations
     dydt_f = 1/kt*(-p*sum(Fnow.*sind(th)) - q*sum(Fnow.*edgecell.*cosd(th))); %mbr frame
     
     numtumblecells = sum(Fnow==0);
-    dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p + by.*Fnow.*cosd(th)*p - bx.*Fnow.*cosd(th)*q - by.*Fnow.*sind(th)*q) + tumbleconstant*numtumblecells);
+    dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p + by.*Fnow.*cosd(th)*p - q*Fnow.*edgecell.*(bx.*cosd(th) + by.*sind(th))) + tumbleconstant*numtumblecells);
     
     % in world-fixed frame
     dxdt = (dxdt_f)*cosd(MBRstate.posn(i-1,3)) - dydt_f*sind(MBRstate.posn(i-1,3));

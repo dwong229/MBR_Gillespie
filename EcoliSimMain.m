@@ -2,12 +2,12 @@
 clear
 close all
 %%%%%%%%
-simMode = 5; %1: one simulation, 2: repetition
+simMode = 6; %1: one simulation, 2: repetition
 % 6: repetition of 4
 %%%%%%%%
 repeatSim = 10;
 
-simIterations = 1000;
+simIterations = 1000;%5000;
 
 %% simulation parameters
 delta = 0; % A -> I   reduced ligand detected
@@ -222,17 +222,18 @@ switch simMode
         MBRcorners.nocells = [];
         
         %% H 60 x 60
-        %MBRcorners.cells(:,1) = [-30;30]; %x coordinates
-        %MBRcorners.cells(:,2) = [-30;30]; %y coordinates
-        
-        MBRcorners.nocells = [-10 10;10 30;-10 -30;10 -10];
-        
-        %translating H
+        % rotating H
         MBRcorners.cells(:,1) = [-30;30]; %x coordinates
         MBRcorners.cells(:,2) = [-30;30]; %y coordinates
         
-        MBRcorners.nocells = [-18 8;13 30;...
-            -12 -30;13 -5];
+        MBRcorners.nocells = [-18 8;18 30;-18 -30;18 -8];        
+        
+        %translating H
+        %MBRcorners.cells(:,1) = [-30;25]; %x coordinates
+        %MBRcorners.cells(:,2) = [-30;25]; %y coordinates
+
+        %MBRcorners.nocells = [-18 8;13 30;...
+        %  -12 -30;13 -5];
         
         %%  Meters to micrometers
         %MBRcorners.cells = MBRcorners.cells*10^-6;
@@ -244,7 +245,7 @@ switch simMode
         %cellposnfile = 'cellposn0angle.mat';
         %cellposnfile = 'cellposnborder.mat';
         
-        %cellposnfile = 'headangle_data_2H_40X.mat';
+        cellposnfile = 'headangle_data_2H_40X.mat';
         %cellposnfile = 'headangle_data_H3.mat';
         cellposnfile = 'headangle_data_H3reverse.mat';
         
@@ -288,6 +289,12 @@ switch simMode
         [rtRatio,dtheta,dx] = eval_MBR_gillespie(timeVec,state,simTime)
         % make a movie to simulate mbr state:
         MBRmovie(timeVec,state)
+        
+        % run a expt compare file
+        H3compare
+        HtransCompare
+        
+        
         
     case 6
         disp('Running Repetition of MBR Simulation')
@@ -336,6 +343,12 @@ switch simMode
             MBRcorners.nocells = [];
         end
         
+        htraj = figure;
+        hold on
+        xlabel('x (um)')
+        ylabel('y (um)')
+        axis ij
+        axis equal
         
         t = CTimeleft(repeatSim);
         for rep = 1:repeatSim
@@ -361,7 +374,14 @@ switch simMode
             stats.dtheta(rep) = dtheta;
             stats.rtratio(rep,:) = rtRatio;
             
-            
+            %% Figure of trajectories superimposed %%
+            timeIdx = find(timeVec>simTime,1);
+            if isempty(timeIdx)
+                disp('Sim too short')
+                rep
+                timeIdx = length(timeVec);
+            end
+            plot(state.posn(1:timeIdx,1),state.posn(1:timeIdx,2),'-g')
             
         end
         %plots
@@ -381,7 +401,6 @@ switch simMode
         
         fprintf('Mean : %5.2f  deg/s \n  SD : %5.2f deg/s \n',meandtheta,sddtheta)
         
-        %% Figure of trajectories superimposed %%
         
         
         

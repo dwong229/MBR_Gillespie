@@ -32,6 +32,7 @@ function [] = MBRmovie(timeVec, state)
 
     buffer = 50;
     axis([xLimits(1) - buffer, xLimits(2) + buffer,yLimits(1) - buffer, yLimits(2) + buffer])
+    axis ij
     axis equal
     axis manual
     % plot first frame
@@ -141,6 +142,7 @@ function [] = MBRmovie(timeVec, state)
                 set(cellplot(j),'Color','b','MarkerSize',3,'Marker','none')
             end
         end
+        axis ij
         axis equal
 
         drawnow

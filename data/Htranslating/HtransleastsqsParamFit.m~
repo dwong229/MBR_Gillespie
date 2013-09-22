@@ -1,0 +1,68 @@
+% Solve least squares for H3 translating case
+
+load('HtransdxdyBody.mat')
+% dxdyBody
+% [ dx/dt dy/dt] in um/s
+% bodyTheta (in deg) 
+
+fps = 10;
+
+dtheta = diff(bodyTheta)*fps; %deg/s
+
+nFrames = length(dtheta);
+
+temp = [dxdyBody dtheta'];
+tempT = temp';
+
+% Ax = B
+B = tempT(:);
+
+% load cellposn
+load('headangle_data_2H_40X.mat')
+
+ %translating H
+        MBRcorners.cells(:,1) = [-30;25]; %x coordinates
+        MBRcorners.cells(:,2) = [-30;25]; %y coordinates
+
+        MBRcorners.nocells = [-18 8;13 30;...
+           -12 -30;13 -5];
+        
+celllength = 10;
+[edgecell,~,~] = find_edge_bacteria(MBRcorners.cells,MBRcorners.nocells,cellposn,celllength);
+
+
+th = cellposn(:,3);
+bx = cellposn(:,1);
+by = cellposn(:,2);
+% define A matrix assuming all cells are exerting a force
+Arows = zeros(3,4);
+
+% sum cos(th)
+Arows(1,1) = -sum(cosd(th)); % negative because propulsion is from tail to head
+
+% sum sin(th)
+Arows(1,2) = sum(edgecell.*sind(th));
+
+% sum cos(th)
+Arows(2,1) = -sum(sind(th)); % negative because propulsion is from tail to head
+
+% sum sin(th)
+Arows(2,2) = sum(edgecell.*cosd(th));
+
+% sum b*cos(th)
+Arows(3,3) = sum(bx.*sind(th) + by.*cosd(th));
+
+% sum b*sin(th)
+Arows(3,4) = sum(edgecell.*(bx.*cosd(th) - by.*sind(th)));
+
+A = repmat(Arows,[nFrames 1]);
+
+x = A\B
+
+% x =
+% 
+%    -0.0006
+%     0.0015
+%          0
+%     0.1863
+% 
