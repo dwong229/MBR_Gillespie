@@ -100,19 +100,54 @@ rect2 = [corners(11,:);corners(5,:)];
 rect3 = [corners(8,:);corners(6,:)];
 figure
 hold on
+pos_data = [];
+j = 1;
 for i = 1:length(cellposnends_microns)
     if is_point_in_box(rect1,cellposnends_microns(i,1:2))==0
-        line(cellposnends_microns(i,[1,3]),cellposnends_microns(i,[2,4]));
+        %line(cellposnends_microns(i,[1,3]),cellposnends_microns(i,[2,4]));
+        pos_data(j,:) = cellposnends_microns(i,:);
+        j = j+1;
     elseif is_point_in_box(rect2,cellposnends_microns(i,1:2))==0
-        line(cellposnends_microns(i,[1,3]),cellposnends_microns(i,[2,4]));
+        %line(cellposnends_microns(i,[1,3]),cellposnends_microns(i,[2,4]));
+        pos_data(j,:) = cellposnends_microns(i,:);
+        j = j+1;
     elseif is_point_in_box(rect3,cellposnends_microns(i,1:2))==0
-        line(cellposnends_microns(i,[1,3]),cellposnends_microns(i,[2,4]));
+        %line(cellposnends_microns(i,[1,3]),cellposnends_microns(i,[2,4]));
+        pos_data(j,:) = cellposnends_microns(i,:);
+        j = j+1;
     end   
 end
 axis equal 
 axis ij
 
 % Determine posn of head
+%% for translation
+for i = 0:length(pos_data)
+    
+    % store temp variables for pairs of coordinates for cells
+    x = pos_data(2*i+1:2*i+2,1);
+    y = pos_data(2*i+1:2*i+2,2);
+    
+    cellLength(i+1) = pdist([x y]);
+    
+    % head is coord where x is more negative
+    if x(1)<x(2)
+        headIdx = 1;
+        disp('case 1')
+        th = rad2deg(atan2(diff(y),diff(x)));
+    else
+        headIdx = 2;
+        disp('case 2')
+        % add - to diff's to flip head and tail
+        th = rad2deg(atan2(-diff(y),-diff(x)));
+    end
+    
+    % save coordinate of head and th in degrees
+    headangle_data(i+1,:) = [x(headIdx),y(headIdx),th];
+    line(x,y);
+    plot(x(headIdx),y(headIdx),'.r')
+end
+
 
 
 % Compute angle of bacteria

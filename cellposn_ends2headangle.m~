@@ -68,7 +68,7 @@ cellposnends_microns = [allcellcoord_data(1:nCells/2,1:2) allcellcoord_data(nCel
 % figure()
 % hold all
 % for i = 2:length(cellposnends)
-%     line(cellposnends_microns(i,[1,3]),cellposnends_microns(i-1,[2,4]));
+%     line(cellposnends_microns(i,[1,3]),cellposnends_microns(i,[2,4]));
 % end
 % 
 % axis ij
@@ -76,7 +76,7 @@ cellposnends_microns = [allcellcoord_data(1:nCells/2,1:2) allcellcoord_data(nCel
 
 %% Determine which cells are within MBR
 % check 3 different rectangles
-corners =    [55.3234  519.0640;
+cornersPixels =    [40.3234  519.0640;
    16.5570   62.0286;
   128.7755   52.8470;
   151.2192  205.8723;
@@ -86,14 +86,65 @@ corners =    [55.3234  519.0640;
   524.6009  484.3783;
   415.4428  489.4792;
   396.0596  324.2119;
-  160.4007  342.5749;
+  139 335;
   175  505];
-rect[1] = corners(
-%for i = 1:length(cellposnends)
-%    is_point_in_box(corners.nocells,posnTemp(1,1:2))==0
-%end
+% 11: 160.4007  342.5749;
+homoCoord = [cornersPixels';ones(1,12)];
+homoStraight = [TR*homoCoord]';
+
+% convert pixels to microns
+corners = homoStraight(:,1:2)/pix2mic;
+
+rect1 = [corners(1,:);corners(3,:)];
+rect2 = [corners(11,:);corners(5,:)];
+rect3 = [corners(8,:);corners(6,:)];
+figure
+hold on
+pos_data = [];
+j = 1;
+for i = 1:length(cellposnends_microns)
+    if is_point_in_box(rect1,cellposnends_microns(i,1:2))==0
+        line(cellposnends_microns(i,[1,3]),cellposnends_microns(i,[2,4]));
+        pos_data(j,:) = cellposnends_microns(i,:);
+    elseif is_point_in_box(rect2,cellposnends_microns(i,1:2))==0
+        line(cellposnends_microns(i,[1,3]),cellposnends_microns(i,[2,4]));
+        pos_data(j,:) = cellposnends_microns(i,:);
+    elseif is_point_in_box(rect3,cellposnends_microns(i,1:2))==0
+        line(cellposnends_microns(i,[1,3]),cellposnends_microns(i,[2,4]));
+        pos_data(j,:) = cellposnends_microns(i,:);
+    end   
+end
+axis equal 
+axis ij
 
 % Determine posn of head
+%% for translation
+for i = 0:nCells-1
+    
+    % store temp variables for pairs of coordinates for cells
+    x = pos_data(2*i+1:2*i+2,1);
+    y = pos_data(2*i+1:2*i+2,2);
+    
+    cellLength(i+1) = pdist([x y]);
+    
+    % head is coord where x is more negative
+    if x(1)<x(2)
+        headIdx = 1;
+        disp('case 1')
+        th = rad2deg(atan2(diff(y),diff(x)));
+    else
+        headIdx = 2;
+        disp('case 2')
+        % add - to diff's to flip head and tail
+        th = rad2deg(atan2(-diff(y),-diff(x)));
+    end
+    
+    % save coordinate of head and th in degrees
+    headangle_data(i+1,:) = [x(headIdx),y(headIdx),th];
+    line(x,y);
+    plot(x(headIdx),y(headIdx),'.r')
+end
+
 
 
 % Compute angle of bacteria
