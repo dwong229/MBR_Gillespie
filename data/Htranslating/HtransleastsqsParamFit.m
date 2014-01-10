@@ -31,7 +31,6 @@ load('headangle_data_2H_40X.mat')
 celllength = 10;
 [edgecell,~,~] = find_edge_bacteria(MBRcorners.cells,MBRcorners.nocells,cellposn,celllength);
 
-
 th = cellposn(:,3);
 bx = cellposn(:,1);
 by = cellposn(:,2);
