@@ -1,3 +1,10 @@
+# Images and videos
+
+*.avi
+*.jpg
+*.tif
+*.fig
+
 #################
 ## Eclipse
 #################
