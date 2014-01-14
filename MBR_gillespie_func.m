@@ -65,6 +65,9 @@ q = FdragRot  % trans
 p = .4804e-12
 q = -.8258e-12
 
+p =   0.5070e-14
+q =  -0.6292e-14
+
 %p = .4804e-12
 %q = -.8258e-12
 
@@ -90,7 +93,10 @@ cellstate = repmat(init,[1,1,numcell]); %cellstate(timeidx,chem,cell)
 % matrix storing the time of next rxn in row 1 and rxn number in row 2
 nextRxnTime = zeros(2,numcell);
 
+% randomize start state (run or tumble)
+runTumble = rand(1,numcell);
 MBRstate.F = ones(1,numcell);
+MBRstate.F(runTumble<1/11) = 0;
 %keyboard
 
 % convert from um to m:

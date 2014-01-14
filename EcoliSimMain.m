@@ -2,12 +2,12 @@
 clear
 close all
 %%%%%%%%
-simMode = 6; %1: one simulation, 2: repetition
+simMode = 5; %1: one simulation, 2: repetition
 % 6: repetition of 4
 %%%%%%%%
 repeatSim = 10;
 
-simIterations = 1000;%5000;
+simIterations = 2000;%5000;
 
 %% simulation parameters
 delta = 0; % A -> I   reduced ligand detected
@@ -245,9 +245,10 @@ switch simMode
         %cellposnfile = 'cellposn0angle.mat';
         %cellposnfile = 'cellposnborder.mat';
         
-        cellposnfile = 'headangle_data_2H_40X.mat';
+        %cellposnfile = 'headangle_data_2H_40X.mat';
         %cellposnfile = 'headangle_data_H3.mat';
-        cellposnfile = 'headangle_data_H3reverse.mat';
+        %cellposnfile = 'headangle_data_H3reverse.mat';
+        cellposnfile = 'cellposnOpenCV2H_headangle.mat';
         
         %cellposnfile = [];
         if exist(cellposnfile,'file') == 2
@@ -326,8 +327,8 @@ switch simMode
             
             %cellposnfile = 'cellposn400cells.mat';
             %cellposnfile = 'cellposnborder.mat';
-            %cellposnfile = [];
-            cellposnfile = 'headangle_data_H3reverse.mat';
+            cellposnfile = [];
+            %cellposnfile = 'headangle_data_H3reverse.mat';
 
             if exist(cellposnfile,'file') == 2
                 disp('Loading cell-position file')

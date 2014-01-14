@@ -19,7 +19,8 @@ tempT = temp';
 B = tempT(:);
 
 % load cellposn
-load('headangle_data_2H_40X.mat')
+%load('headangle_data_2H_40X.mat')
+load('cellposnOpenCV2H_headangle.mat')
 
  %translating H
         MBRcorners.cells(:,1) = [-30;25]; %x coordinates
