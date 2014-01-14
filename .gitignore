@@ -3,6 +3,7 @@
 *.avi
 *.jpg
 *.tif
+*.fig
 
 #################
 ## Eclipse
