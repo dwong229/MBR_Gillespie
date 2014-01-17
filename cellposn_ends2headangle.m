@@ -15,7 +15,11 @@ clear all
 close all
 
 %% Importing data
-cellposnfilename = 'cellposnOpenCV2H.txt';
+%cellposnfilename = 'cellposnOpenCV2H.txt'; % Translations 
+datafile = '2H';
+cellposnfilename = 'cellposnOpenCVH3c.txt'; % Rotation 
+datafile = 'H3';
+
 fid = fopen(cellposnfilename,'r');
 
 % define corners of MBR:
@@ -37,60 +41,124 @@ cellposnends = cellposnends';
 % axis image
 
 %% Transform coordinates into 
-% Define coordinates of corners of H from pixels to um and rotated to
-% aligned (from headstail2headangle.m:
-MBRcenter = [272.7,270];
 
-LLCorner = [40 62];
-LRCorner = [471 33];
-%MBRangle = rad2deg(atan2(33-62,471-40))
-MBRangle = -2;
-pix2mic = 494/60; % pixels per 60um
+if datafile == '2H'
+    % Define coordinates of corners of H from pixels to um and rotated to
+    % aligned (from headstail2headangle.m:
+    MBRcenter = [272.7,270];
+    
+    LLCorner = [40 62];
+    LRCorner = [471 33];
+    %MBRangle = rad2deg(atan2(33-62,471-40))
+    MBRangle = -2;
+    pix2mic = 494/60; % pixels per 60um
+    
+    % just rotating without moving coordinates is not quite correct...
+    rotMat = @(x)[cosd(x) -sind(x);sind(x) cosd(x)];
+    TR = zeros(3,3);
+    TR(1:2,1:2) = rotMat(-MBRangle);
+    MBRcenter = rotMat(-MBRangle)*MBRcenter';
+    TR(:,3) = [-MBRcenter;1];
+    
+    nCells = length(cellposnends)*2;
+    allcellcoords = [cellposnends(:,1:2);cellposnends(:,3:4)];
+    homoCoord = [allcellcoords';ones(1,nCells)];
+    homoStraight = [TR*homoCoord]';
+    
+    % convert pixels to microns
+    allcellcoord_data = homoStraight(:,1:2)/pix2mic;
+    
+    cellposnends_microns = [allcellcoord_data(1:nCells/2,1:2) allcellcoord_data(nCells/2+1:nCells,1:2)]
+    
+    % Troubleshoot figure
+    % figure()
+    % hold all
+    % for i = 2:length(cellposnends)
+    %     line(cellposnends_microns(i,[1,3]),cellposnends_microns(i,[2,4]));
+    % end
+    %
+    % axis ij
+    % axis image
+    
+    %% Determine which cells are within MBR
+    % check 3 different rectangles for 40um H
+    
+    % corner pixels from image
+    cornersPixels =    [40.3234  519.0640;
+        16.5570   62.0286;
+        128.7755   52.8470;
+        151.2192  205.8723;
+        385.8579  194.6505;
+        371.5756   39.5849;
+        485.8345   24.2823;
+        524.6009  484.3783;
+        415.4428  489.4792;
+        396.0596  324.2119;
+        139 335;
+        175  505];
+    % 11: 160.4007  342.5749;
+    
+elseif datafile == 'H3'
+    % Define coordinates of corners of H from pixels to um and rotated to
+    % aligned (from headstail2headangle.m:
+    MBRcenter = [272.7,270];
+    
+    LLCorner = [40 62];
+    LRCorner = [471 33];
+    %MBRangle = rad2deg(atan2(33-62,471-40))
+    MBRangle = -2;
+    pix2mic = 494/60; % pixels per 60um
+    
+    % just rotating without moving coordinates is not quite correct...
+    rotMat = @(x)[cosd(x) -sind(x);sind(x) cosd(x)];
+    TR = zeros(3,3);
+    TR(1:2,1:2) = rotMat(-MBRangle);
+    MBRcenter = rotMat(-MBRangle)*MBRcenter';
+    TR(:,3) = [-MBRcenter;1];
+    
+    nCells = length(cellposnends)*2;
+    allcellcoords = [cellposnends(:,1:2);cellposnends(:,3:4)];
+    homoCoord = [allcellcoords';ones(1,nCells)];
+    homoStraight = [TR*homoCoord]';
+    
+    % convert pixels to microns
+    allcellcoord_data = homoStraight(:,1:2)/pix2mic;
+    
+    cellposnends_microns = [allcellcoord_data(1:nCells/2,1:2) allcellcoord_data(nCells/2+1:nCells,1:2)]
+    
+    % Troubleshoot figure
+    % figure()
+    % hold all
+    % for i = 2:length(cellposnends)
+    %     line(cellposnends_microns(i,[1,3]),cellposnends_microns(i,[2,4]));
+    % end
+    %
+    % axis ij
+    % axis image
+    
+    %% Determine which cells are within MBR
+    % check 3 different rectangles for 40um H
+    
+    % corner pixels from image
+    cornersPixels =    [40.3234  519.0640;
+        16.5570   62.0286;
+        128.7755   52.8470;
+        151.2192  205.8723;
+        385.8579  194.6505;
+        371.5756   39.5849;
+        485.8345   24.2823;
+        524.6009  484.3783;
+        415.4428  489.4792;
+        396.0596  324.2119;
+        139 335;
+        175  505];
+    
+    
+    
+    
+    
+end
 
-% just rotating without moving coordinates is not quite correct...
-rotMat = @(x)[cosd(x) -sind(x);sind(x) cosd(x)];
-TR = zeros(3,3);
-TR(1:2,1:2) = rotMat(-MBRangle);
-MBRcenter = rotMat(-MBRangle)*MBRcenter';
-TR(:,3) = [-MBRcenter;1];
-
-nCells = length(cellposnends)*2;
-allcellcoords = [cellposnends(:,1:2);cellposnends(:,3:4)];
-homoCoord = [allcellcoords';ones(1,nCells)];
-homoStraight = [TR*homoCoord]';
-
-% convert pixels to microns
-allcellcoord_data = homoStraight(:,1:2)/pix2mic;
-
-cellposnends_microns = [allcellcoord_data(1:nCells/2,1:2) allcellcoord_data(nCells/2+1:nCells,1:2)]
-
-% Troubleshoot figure
-% figure()
-% hold all
-% for i = 2:length(cellposnends)
-%     line(cellposnends_microns(i,[1,3]),cellposnends_microns(i,[2,4]));
-% end
-% 
-% axis ij
-% axis image
-
-%% Determine which cells are within MBR
-% check 3 different rectangles for 40um H
-
-% corner pixels from image
-cornersPixels =    [40.3234  519.0640;
-   16.5570   62.0286;
-  128.7755   52.8470;
-  151.2192  205.8723;
-  385.8579  194.6505;
-  371.5756   39.5849;
-  485.8345   24.2823;
-  524.6009  484.3783;
-  415.4428  489.4792;
-  396.0596  324.2119;
-  139 335;
-  175  505];
-% 11: 160.4007  342.5749;
 homoCoord = [cornersPixels';ones(1,12)];
 homoStraight = [TR*homoCoord]';
 
@@ -175,12 +243,12 @@ while size(pos_data,1)>1
     intersection = check_line_intersection(pos_data(1,1:2),pos_data(1,3:4),pos_data(2:end,1:2),pos_data(2:end,3:4));
     
     if isempty(intersection)
-        disp('no intersection')
+        %disp('no intersection')
         filtered_pos_data = [filtered_pos_data;pos_data(1,:)];      
         
     elseif length(intersection) ==1
         % if cell intersects with one other cell, average the values for length and angle
-        disp('2 cells intersect')
+        %disp('2 cells intersect')
         
         coords = pos_data(intersection+1,:);
         distmat = dist([pos_data(1,[1:2])',coords(1:2)' coords(3:4)']);
@@ -211,7 +279,7 @@ while size(pos_data,1)>1
         pos_data(intersection + 1,:) = [];
     else
         % if cell interects with more than 1 other cell throw it away
-        disp('More than 2 cells intersect')
+        %disp('More than 2 cells intersect')
         set(l2(pos_data(1,5)),'Color','g')
         
     end

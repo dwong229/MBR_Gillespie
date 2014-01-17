@@ -292,7 +292,7 @@ switch simMode
         MBRmovie(timeVec,state)
         
         % run a expt compare file
-        H3compare
+        %H3compare
         HtransCompare
         
         

@@ -110,6 +110,60 @@ Atrans = A;
 Btrans = B;
 Apqtrans = Apq;
 
+%
+disp('runDeterministicModel')
+
+% determine time variables
+time = 65000;
+timestep = 1/1000;
+
+pbar = 10/11*xpq(1);
+qbar = xpq(2);
+
+%Initialize posn
+r1 = [0;0;0]; %r(1) = r_x, r(2)=r_y, r(3) = phi
+r2 = [0;0;0];
+rhistory = zeros(3,time);
+
+%$================== FINISH THIS!!!!
+
+for i = 1:time
+    Adeterministic = [Arowspq zeros(3,1)];
+    dx = Adeterministic * r1;
+    xdot = dx(1);
+    ydot = dx(2);
+    phidot = dx(3);
+    
+    %xdot = (pbar *B1+qbar*G1)*cos(r1(3)) - (pbar*B2+qbar*G2)*sin(r1(3));
+    %ydot = (pbar *B1+qbar*G1)*sin(r1(3)) + (pbar*B2+qbar*G2)*cos(r1(3));
+    %phidot = pbar*B3 + qbar*G3;
+    
+    r2(1) = r1(1) + (timestep)*xdot;
+    r2(2) = r1(2) + (timestep)*ydot;
+    r2(3) = r1(3) + (timestep)*phidot;
+    
+    rhistory(:,i) = r2;
+    r1 = r2;
+end
+
+timeaxis = timestep*[1:time];
+
+figure
+subplot(2,1,1)
+plot(rhistory(1,:),rhistory(2,:))
+ylabel('y','fontsize',20)
+xlabel('x','fontsize',20)
+
+
+subplot(2,1,2)
+plot(timeaxis,rhistory(3,:))
+ylabel('\phi','fontsize',20)
+xlabel('Time [s]','fontsize',20)
+
+
+%%
+disp('Dont run rotation')
+break
 %%%%%% ROTATION %%%%%%%%
 % run rotation least sqs
 HrotleastsqsParamFit
@@ -144,3 +198,4 @@ xpqBoth = Apqboth\Bboth
 %     0.2503
 %     0.1316
 
+deterministicmodel
