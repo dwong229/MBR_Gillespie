@@ -78,7 +78,8 @@ error = abs(B - A*x);
 %%%%% solve for p.q.
 
 kr = 1/1.0766e-11; % 1/kr
-kt = 1/1.3e-12; % 1/kt
+%kt = 1/1.3e-12; % 1/kt
+kt = 1/1.5e-6; % 1/kt
 
 Arowspq = zeros(3,2);
 
@@ -114,7 +115,7 @@ Apqtrans = Apq;
 disp('runDeterministicModel')
 
 % determine time variables
-time = 65000;
+time = 3000;
 timestep = 1/1000;
 
 pbar = 10/11*xpq(1);
@@ -133,6 +134,14 @@ for i = 1:time
     xdot = dx(1);
     ydot = dx(2);
     phidot = dx(3);
+    
+    B1 = - kt * sum(cosd(th));
+    B2 = kt * sum(sind(th));
+    B3 = kr * sum(bx.*sind(th) - by.*cosd(th));
+    G1 = - kt * sum(sind(th));
+    G2 = kt * sum(cosd(th));
+    G3 = kr * sum(bx.*cosd(th) - by.*sind(th));
+    
     
     xdot = (pbar *B1+qbar*G1)*cos(r1(3)) - (pbar*B2+qbar*G2)*sin(r1(3));
     ydot = (pbar *B1+qbar*G1)*sin(r1(3)) + (pbar*B2+qbar*G2)*cos(r1(3));
