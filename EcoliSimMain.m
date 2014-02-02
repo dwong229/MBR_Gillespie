@@ -2,12 +2,12 @@
 clear
 close all
 %%%%%%%%
-simMode = 5; %1: one simulation, 2: repetition
+simMode = 6; %1: one simulation, 2: repetition
 % 6: repetition of 4
 %%%%%%%%
 repeatSim = 10;
 
-simIterations = 3000;%5000;
+simIterations = 1000;%5000;
 
 %% simulation parameters
 delta = 0; % A -> I   reduced ligand detected
@@ -267,7 +267,7 @@ switch simMode
         y = state.posn(:,2);
         th = state.posn(:,3);
         
-        figure
+        hxyth = figure;
         subplot(2,1,1)
         plot(timeVec,x,'-b',timeVec,y,'-r')
         title('MBR simulation')
@@ -284,8 +284,34 @@ switch simMode
         % save figure for position and orientation
         print(gcf,'-djpeg','posOrientationSim1.jpg')
         
-        figure
-        plot(x,y)
+        htraj = figure;
+        plot(x,y,'-g')
+        xlabel('x')
+        ylabel('y')
+        title('Position (um)')
+        
+        %---- Compare with deterministic model ----
+        keyboard
+        EndTimeIdx = find(timeVec(end)>state.detTime,1,'last') + 1;
+        timeaxis = state.detTime(1:EndTimeIdx);
+        xDet = state.detPosn(1,1:EndTimeIdx)*10^6;
+        yDet = state.detPosn(2,1:EndTimeIdx)*10^6;
+        thDet = state.detPosn(3,1:EndTimeIdx);
+        
+        figure(hxyth) 
+        subplot(2,1,1)
+        hold on
+        plot(timeaxis,xDet,'.b')
+        plot(timeaxis,yDet,'.r')
+        subplot(2,1,2)
+        plot(timeaxis,thDet,'.b')
+
+        
+        figure(htraj)
+        hold on
+        plot(xDet,yDet,'.b')
+        % -- end determinent comparison -- 
+        
         
         [rtRatio,dtheta,dx] = eval_MBR_gillespie(timeVec,state,simTime)
         % make a movie to simulate mbr state:
@@ -316,19 +342,19 @@ switch simMode
             %MBRcorners.cells(:,1) = [-30;30]; %x coordinates
             %MBRcorners.cells(:,2) = [-30;30]; %y coordinates
             
-            MBRcorners.nocells = [-10 10;10 30;-10 -30;10 -10];
+            %MBRcorners.nocells = [-10 10;10 30;-10 -30;10 -10];
+            MBRcorners.nocells = [-18 8;18 30;-18 -30;18 -8];        
             
             %translating H
             MBRcorners.cells(:,1) = [-30;30]; %x coordinates
             MBRcorners.cells(:,2) = [-30;30]; %y coordinates
-            
-            MBRcorners.nocells = [-18 8;13 30;...
-                -12 -30;13 -5];
-            
+                               
             %cellposnfile = 'cellposn400cells.mat';
             %cellposnfile = 'cellposnborder.mat';
             cellposnfile = [];
             %cellposnfile = 'headangle_data_H3reverse.mat';
+            cellposnfile = 'cellposnOpenCV2H_headangle.mat';
+
 
             if exist(cellposnfile,'file') == 2
                 disp('Loading cell-position file')

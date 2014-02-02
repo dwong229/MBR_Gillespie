@@ -307,3 +307,9 @@ end
 
 % convert m to um
 MBRstate.posn(:,1:2) = MBRstate.posn(:,1:2)*10^6;
+
+%% Compute deterministic model and save in MBRstate.detPosn
+[MBRx,MBRy,MBRth,timeaxis] = runDeterministicModel(kt,kr,p,q,MBRstate.cellposn,edgecell);
+
+MBRstate.detTime = timeaxis;
+MBRstate.detPosn = [MBRx;MBRy;MBRth];
