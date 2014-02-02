@@ -258,9 +258,16 @@ for i = 2:simIterations
     % with side force
     dxdt_f = 1/kt*(-p*sum(Fnow.*cosd(th)) + q*sum(Fnow.*edgecell.*sind(th))); %mbr frame
     dydt_f = 1/kt*(-p*sum(Fnow.*sind(th)) - q*sum(Fnow.*edgecell.*cosd(th))); %mbr frame
-    
+      
     numtumblecells = sum(Fnow==0);
     dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p + by.*Fnow.*cosd(th)*p - q*Fnow.*edgecell.*(bx.*cosd(th) + by.*sind(th))) + tumbleconstant*numtumblecells);
+    
+    %% 4:46pm 2/2/2014 changes
+    % with side force
+    dxdt_f = 1/kt*(-p*sum(Fnow.*cosd(th)) - q*sum(Fnow.*edgecell.*sind(th))); %mbr frame
+    dydt_f = 1/kt*(p*sum(Fnow.*sind(th)) + q*sum(Fnow.*edgecell.*cosd(th))); %mbr frame
+    dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p - by.*Fnow.*cosd(th)*p + q*Fnow.*edgecell.*(bx.*cosd(th) - by.*sind(th))) + tumbleconstant*numtumblecells);
+    %----
     
     % in world-fixed frame
     dxdt = (dxdt_f)*cosd(MBRstate.posn(i-1,3)) - dydt_f*sind(MBRstate.posn(i-1,3));

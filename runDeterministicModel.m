@@ -63,9 +63,12 @@ for i = 1:time
     G2 = kt * sum(cosd(th));
     G3 = kr * sum(bx.*cosd(th) - by.*sind(th));
     
+    %% 4:46pm 2/2/2014 changes
+    %G1 = kt * sum(sind(th));
     
-    xdot = (pbar *B1+qbar*G1)*cos(r1(3)) - (pbar*B2+qbar*G2)*sin(r1(3));
-    ydot = (pbar *B1+qbar*G1)*sin(r1(3)) + (pbar*B2+qbar*G2)*cos(r1(3));
+    
+    xdot = (pbar *B1+qbar*G1)*cosd(r1(3)) - (pbar*B2+qbar*G2)*sind(r1(3));
+    ydot = (pbar *B1+qbar*G1)*sind(r1(3)) + (pbar*B2+qbar*G2)*cosd(r1(3));
     phidot = pbar*B3 + qbar*G3;
     
     r2(1) = r1(1) + (timestep)*xdot;
