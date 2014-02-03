@@ -3,11 +3,11 @@
 load('HtransdxdyBody.mat')
 % dxdyBody
 % [ dx/dt dy/dt] in um/s
-% bodyTheta (in deg) 
+% bodyTheta (in deg)
 
 fps = 5;
 
-dtheta = -diff(bodyTheta)*fps; %deg/s flip into 
+dtheta = -diff(bodyTheta)*fps; %deg/s flip into
 dxdyBody = dxdyBody * fps; % um/s (not um/frame)
 
 nFrames = length(dtheta);
@@ -22,19 +22,20 @@ B = tempT(:);
 %load('headangle_data_2H_40X.mat')
 load('cellposnOpenCV2H_headangle.mat')
 
- %translating H
-        MBRcorners.cells(:,1) = [-30;25]; %x coordinates
-        MBRcorners.cells(:,2) = [-30;25]; %y coordinates
+%translating H
+MBRcorners.cells(:,1) = [-30;25]; %x coordinates
+MBRcorners.cells(:,2) = [-30;25]; %y coordinates
 
-        MBRcorners.nocells = [-18 8;13 30;...
-           -12 -30;13 -5];
-        
+MBRcorners.nocells = [-18 8;13 30;...
+    -12 -30;13 -5];
+
 celllength = 10;
 [edgecell,~,~] = find_edge_bacteria(MBRcorners.cells,MBRcorners.nocells,cellposn,celllength);
 
 th = cellposn(:,3);
 bx = cellposn(:,1);
 by = cellposn(:,2);
+
 % define A matrix assuming all cells are exerting a force
 Arows = zeros(3,4);
 
@@ -61,12 +62,12 @@ A = repmat(Arows,[nFrames 1]);
 x = A\B
 
 % x =
-% 
+%
 %    -0.0006
 %     0.0015
 %          0
 %     0.1863
-% 
+%
 
 disp('Translation Fit Error analysis')
 error = abs(B - A*x);
@@ -80,6 +81,15 @@ error = abs(B - A*x);
 kr = 1/1.0766e-11; % 1/kr
 %kt = 1/1.3e-12; % 1/kt
 kt = 1/1.5e-6; % 1/kt
+
+% compute parameters
+B1 = - kt * sum(cosd(th));
+B2 = -kt * sum(sind(th));
+B3 = kr * sum(bx.*sind(th) + by.*cosd(th));
+G1 = kt * sum(edgecell.*sind(th));
+G2 = - kt * sum(edgecell.*cosd(th));
+G3 = kr * sum(-edgecell.*bx.*cosd(th) + edgecell.*by.*sind(th));
+
 
 Arowspq = zeros(3,2);
 
@@ -99,7 +109,7 @@ Arowspq(2,2) = -kt*sum(edgecell.*cosd(th));
 Arowspq(3,1) = kr*sum(bx.*sind(th) + by.*cosd(th));
 
 % sum b*sin(th)
-Arowspq(3,2) = -kr*sum(edgecell.*(bx.*cosd(th) + by.*sind(th)));
+Arowspq(3,2) = kr*sum(edgecell.*(-bx.*cosd(th) + by.*sind(th)));
 
 Apq = repmat(Arowspq,[nFrames 1]);
 
@@ -111,10 +121,15 @@ Atrans = A;
 Btrans = B;
 Apqtrans = Apq;
 
-%
 disp('runDeterministicModel')
 
-[MBRx,MBRy,MBRth,timeaxis] = runDeterministicModel(1/kt,1/kr,xpq(1),xpq(2),cellposn,edgecell);
+[MBRx,MBRy,MBRth,timeaxis] = runDeterministicModel(1/kt,1/kr,xpq(1),xpq(2),cellposn,edgecell,[0;0;60]');
+%[MBRx,MBRy,MBRth,timeaxis] = runDeterministicModel(1/kt,1/kr,xpqNoTheta(1),xpqNoTheta(2),cellposn,edgecell,[0;0;60]');
+
+
+% plot to check
+HtransCompare(MBRx,MBRy,MBRth,timeaxis)
+
 
 %%
 disp('Dont run rotation')
@@ -147,9 +162,9 @@ disp('P Q fit both rotation and translation')
 
 xpqBoth = Apqboth\Bboth
 % xpq =
-% 
+%
 %    1.0e-13 *
-% 
+%
 %     0.2503
 %     0.1316
 

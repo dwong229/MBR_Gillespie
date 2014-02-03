@@ -13,6 +13,8 @@ dtheta = diff(bodyTheta)*fps; %deg/s
 dtheta = -dtheta(30:79);
 dxdyBody = dxdyBody*fps;
 
+kr = 1/1.0766e-11; % 1/kr
+kt = 1/1.5e-6; % 1/kt
 
 nFrames = length(dtheta);
 
@@ -42,24 +44,24 @@ by = cellposn(:,2);
 Arows = zeros(3,4);
 
 % sum cos(th)
-Arows(1,1) = -sum(cosd(th)); % negative because propulsion is from tail to head
+Arowspq(1,1) = -kt*sum(cosd(th)); % negative because propulsion is from tail to head
 
 % sum sin(th)
-Arows(1,2) = sum(edgecell.*sind(th));
+Arowspq(1,2) = kt*sum(edgecell.*sind(th));
 
 % sum cos(th)
-Arows(2,1) = -sum(sind(th)); % negative because propulsion is from tail to head
+Arowspq(2,1) = -kt*sum(sind(th)); % negative because propulsion is from tail to head
 
 % sum sin(th)
-Arows(2,2) = -sum(edgecell.*cosd(th));
+Arowspq(2,2) = -kt*sum(edgecell.*cosd(th));
 
 % sum b*cos(th)
-Arows(3,3) = sum(bx.*sind(th) + by.*cosd(th));
+Arowspq(3,1) = kr*sum(bx.*sind(th) + by.*cosd(th));
 
 % sum b*sin(th)
-Arows(3,4) = -sum(edgecell.*(bx.*cosd(th) + by.*sind(th)));
+Arowspq(3,2) = kr*sum(edgecell.*(-bx.*cosd(th) + by.*sind(th)));
 
-A = repmat(Arows,[nFrames 1]);
+A = repmat(Arowspq,[nFrames 1]);
 
 disp('Rotation Analysis x(4)')
 x = A\B
@@ -80,30 +82,3 @@ errorDeg = sum(error(3:3:end))
 
 %%%%% solve for p.q.
 
-kr = 1/1.0766e-11; % 1/kr
-kt = 1/1.5e-12; % 1/kt
-
-Arowspq = zeros(3,2);
-
-% sum cos(th)
-Arowspq(1,1) = -kt*sum(cosd(th)); % negative because propulsion is from tail to head
-
-% sum sin(th)
-Arowspq(1,2) = kt*sum(edgecell.*sind(th));
-
-% sum cos(th)
-Arowspq(2,1) = -kt*sum(sind(th)); % negative because propulsion is from tail to head
-
-% sum sin(th)
-Arowspq(2,2) = -kt*sum(edgecell.*cosd(th));
-
-% sum b*cos(th)
-Arowspq(3,1) = kr*sum(bx.*sind(th) + by.*cosd(th));
-
-% sum b*sin(th)
-Arowspq(3,2) = -kr*sum(edgecell.*(bx.*cosd(th) + by.*sind(th)));
-
-Apq = repmat(Arowspq,[nFrames 1]);
-
-disp('Rotation Analysis PQ')
-xpq = Apq\B

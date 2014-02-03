@@ -2,10 +2,10 @@
 clear
 close all
 %%%%%%%%
-simMode = 6; %1: one simulation, 2: repetition
+simMode = 5; %1: one simulation, 2: repetition
 % 6: repetition of 4
 %%%%%%%%
-repeatSim = 2;
+repeatSim = 5;
 
 simIterations = 1000;%5000;
 
@@ -294,9 +294,9 @@ switch simMode
         keyboard
         EndTimeIdx = find(timeVec(end)>state.detTime,1,'last') + 1;
         timeaxis = state.detTime(1:EndTimeIdx);
-        xDet = state.detPosn(1,1:EndTimeIdx)*10^6;
-        yDet = state.detPosn(2,1:EndTimeIdx)*10^6;
-        thDet = state.detPosn(3,1:EndTimeIdx);
+        xDet = state.detPosn(1:EndTimeIdx,1)*10^6;
+        yDet = state.detPosn(1:EndTimeIdx,2)*10^6;
+        thDet = state.detPosn(1:EndTimeIdx,3);
         
         figure(hxyth) 
         subplot(2,1,1)
@@ -304,6 +304,7 @@ switch simMode
         plot(timeaxis,xDet,'.b')
         plot(timeaxis,yDet,'.r')
         subplot(2,1,2)
+        hold on
         plot(timeaxis,thDet,'.b')
 
         
@@ -320,7 +321,7 @@ switch simMode
         
         % run a expt compare file
         %H3compare
-        %HtransCompare
+        HtransCompare(x,y,th,timeVec)
         
         
         
@@ -409,9 +410,21 @@ switch simMode
                 rep
                 timeIdx = length(timeVec);
             end
+            figure(htraj)
             plot(state.posn(1:timeIdx,1),state.posn(1:timeIdx,2),'-g')
             
         end
+        figure(htraj)
+        EndTimeIdx = find(timeVec(end)>state.detTime,1,'last') + 1;
+        timeaxis = state.detTime(1:EndTimeIdx);
+        xDet = state.detPosn(1:EndTimeIdx,1)*10^6;
+        yDet = state.detPosn(1:EndTimeIdx,2)*10^6;
+        thDet = state.detPosn(1:EndTimeIdx,3);
+
+        hold on
+        plot(xDet,yDet,'-b')
+        axis ij
+        
         %plots
         figure
         hist(stats.dtheta(:))

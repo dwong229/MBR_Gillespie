@@ -33,7 +33,7 @@ tumbleconstant = 0; %[Nm] CCW>0, CW<0
 %Tumble constant should be positive, so that it exerts CCW torque on MBR
 %update MBR state
 %p = 0.41e-12; %pN from lit
-p = 0.45e-12 %pN from lit
+p = 0.45e-12; %pN from lit
 % convert p and q to up and uq
 %p = p*1e6;
 %q = q*1e6;
@@ -59,17 +59,20 @@ VdragRot = rad2deg(0.016); %deg/s 0.016 rad / s
 kr = FdragRot*30/VdragRot % N um s/deg
 
 %% compute q force based on torque and number of edge cells
-q = FdragRot  % trans
+q = FdragRot;  % trans
 
 % LEAST SQS P.Q
-p = .4804e-12
-q = -.8258e-12
+p = .4804e-12;
+q = -.8258e-12;
 
-p =   0.5070e-14
-q =  -0.6292e-14
+p =   0.5070e-14;
+q =  -0.6292e-14;
 
-%p = .4804e-12
-%q = -.8258e-12
+p = 0.5701e-8;
+q = 0.0941e-8;
+
+%p = .4804e-12;
+%q = -.8258e-12;
 
 %%
 %uFdragRot = FdragRot * (1e12);
@@ -260,19 +263,11 @@ for i = 2:simIterations
     dydt_f = 1/kt*(-p*sum(Fnow.*sind(th)) - q*sum(Fnow.*edgecell.*cosd(th))); %mbr frame
       
     numtumblecells = sum(Fnow==0);
-    dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p + by.*Fnow.*cosd(th)*p - q*Fnow.*edgecell.*(bx.*cosd(th) + by.*sind(th))) + tumbleconstant*numtumblecells);
+    dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p + by.*Fnow.*cosd(th)*p + q*Fnow.*edgecell.*(-bx.*cosd(th) + by.*sind(th))) + tumbleconstant*numtumblecells);
     
-    fprintf('Before: xbody: %8.8f ybody: %8.8f thbody: %8.6f \n',dxdt_f,dydt_f,dadt_f)
-
-    
-    %% 4:46pm 2/2/2014 changes
-    % with side force
-    dxdt_f = 1/kt*(-p*sum(Fnow.*cosd(th)) - q*sum(Fnow.*edgecell.*sind(th))); %mbr frame
-    dydt_f = 1/kt*(p*sum(Fnow.*sind(th)) + q*sum(Fnow.*edgecell.*cosd(th))); %mbr frame
-    dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p - by.*Fnow.*cosd(th)*p + q*Fnow.*edgecell.*(bx.*cosd(th) - by.*sind(th))) + tumbleconstant*numtumblecells);
-    %----
-    fprintf('Modified: xbody: %8.6f ybody: %8.6f thbody: %8.6f \n',dxdt_f,dydt_f,dadt_f)
-    keyboard
+    %fprintf('Before: xbody: %8.8f ybody: %8.8f thbody: %8.6f \n',dxdt_f,dydt_f,dadt_f)
+    %keyboard
+      
     % in world-fixed frame
     dxdt = (dxdt_f)*cosd(MBRstate.posn(i-1,3)) - dydt_f*sind(MBRstate.posn(i-1,3));
     dydt = (dxdt_f)*sind(MBRstate.posn(i-1,3)) + dydt_f*cosd(MBRstate.posn(i-1,3));
@@ -319,8 +314,8 @@ end
 % convert m to um
 MBRstate.posn(:,1:2) = MBRstate.posn(:,1:2)*10^6;
 
-%% Compute deterministic model and save in MBRstate.detPosn
-[MBRx,MBRy,MBRth,timeaxis] = runDeterministicModel(kt,kr,p,q,MBRstate.cellposn,edgecell);
 
+%% Compute deterministic model and save in MBRstate.detPosn
+[MBRx,MBRy,MBRth,timeaxis] = runDeterministicModel(kt,kr,p,q,MBRstate.cellposn,edgecell,MBRstate.posn(1,:));
 MBRstate.detTime = timeaxis;
-MBRstate.detPosn = [MBRx;MBRy;MBRth];
+MBRstate.detPosn = [MBRx' MBRy' MBRth'];
