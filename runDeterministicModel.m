@@ -65,8 +65,10 @@ for i = 1:time
     
     %% 4:46pm 2/2/2014 changes
     %G1 = kt * sum(sind(th));
-    
-    
+    xbody = (pbar *B1+qbar*G1);
+    ybody = (pbar*B2+qbar*G2);
+    fprintf('xbody: %8.6f ybody: %8.6f phibody: %8.6f \n',xbody,ybody,phidot)
+    keyboard
     xdot = (pbar *B1+qbar*G1)*cosd(r1(3)) - (pbar*B2+qbar*G2)*sind(r1(3));
     ydot = (pbar *B1+qbar*G1)*sind(r1(3)) + (pbar*B2+qbar*G2)*cosd(r1(3));
     phidot = pbar*B3 + qbar*G3;

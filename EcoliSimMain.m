@@ -5,7 +5,7 @@ close all
 simMode = 6; %1: one simulation, 2: repetition
 % 6: repetition of 4
 %%%%%%%%
-repeatSim = 10;
+repeatSim = 2;
 
 simIterations = 1000;%5000;
 
@@ -310,6 +310,7 @@ switch simMode
         figure(htraj)
         hold on
         plot(xDet,yDet,'.b')
+        axis ij
         % -- end determinent comparison -- 
         
         
@@ -319,7 +320,7 @@ switch simMode
         
         % run a expt compare file
         %H3compare
-        HtransCompare
+        %HtransCompare
         
         
         
