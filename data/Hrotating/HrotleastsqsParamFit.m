@@ -5,13 +5,28 @@ load('HRotdxdyBody.mat')
 % [ dx/dt dy/dt] in um/s
 % bodyTheta (in deg) 
 
+
+
 fps = 4;
 
 dxdyBody = dxdyBody(30:79,:);  %take last 50frames
 
 dtheta = diff(bodyTheta)*fps; %deg/s
 dtheta = -dtheta(30:79);
-dxdyBody = dxdyBody*fps;
+dxdyBody = dxdyBody*fps * 10^-6; % um/s -> m/s (not um/frame)
+
+% What we are trying to fit
+vh = figure;
+subplot(3,1,1)
+plot(dxdyBody(:,1),'.b')
+ylabel('X velocity (body frame)')
+subplot(3,1,2)
+plot(dxdyBody(:,2),'.b')
+ylabel('Y velocity (body frame)')
+subplot(3,1,3)
+plot(bodyTheta)
+ylabel('Angular Velocity')
+xlabel('frame')
 
 kr = 1/1.0766e-11; % 1/kr
 kt = 1/1.5e-6; % 1/kt

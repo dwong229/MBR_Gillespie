@@ -8,9 +8,40 @@ load('HtransdxdyBody.mat')
 fps = 5;
 
 dtheta = -diff(bodyTheta)*fps; %deg/s flip into
-dxdyBody = dxdyBody * fps; % um/s (not um/frame)
+dxdyBody = dxdyBody * fps * 10^-6; % um/s -> m/s (not um/frame)
 
 nFrames = length(dtheta);
+
+
+% What we are trying to fit
+vh = figure;
+subplot(3,1,1)
+plot(dxdyBody(:,1),'.b')
+ylabel('X velocity (body frame)')
+subplot(3,1,2)
+plot(dxdyBody(:,2),'.b')
+ylabel('Y velocity (body frame)')
+subplot(3,1,3)
+plot(bodyTheta)
+ylabel('Angular Velocity')
+xlabel('frame')
+
+% check traj
+worldX = cumsum(dxdyBody(:,1));
+worldY = cumsum(dxdyBody(:,2));
+worldTheta = cumsum(bodyTheta);
+trajfromvh = figure;
+subplot(1,2,1)
+plot(worldX,worldY,'.b')
+xlabel('X')
+ylabel('Y')
+subplot(1,2,2)
+plot(worldTheta,'.b')
+ylabel('Orientation')
+xlabel('frame')
+
+
+
 
 temp = [dxdyBody dtheta'];
 tempT = temp';

@@ -74,7 +74,7 @@ for i = 1:time
     xdot = (pbar *B1+qbar*G1)*cosd(r1(3)) - (pbar*B2+qbar*G2)*sind(r1(3));
     ydot = (pbar *B1+qbar*G1)*sind(r1(3)) + (pbar*B2+qbar*G2)*cosd(r1(3));
     phidot = pbar*B3 + qbar*G3;
-    disp('Deterministic')
+    %disp('Deterministic')
     %fprintf('xbody: %8.8f ybody: %8.8f phibody: %8.8f \n',xbody,ybody,phidot)
     %keyboard
     
