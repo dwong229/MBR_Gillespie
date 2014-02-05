@@ -7,7 +7,7 @@ simMode = 5; %1: one simulation, 2: repetition
 %%%%%%%%
 repeatSim = 5;
 
-simIterations = 1000;%5000;
+simIterations = 5000;%5000;
 
 %% simulation parameters
 delta = 0; % A -> I   reduced ligand detected
@@ -229,11 +229,11 @@ switch simMode
         MBRcorners.nocells = [-18 8;18 30;-18 -30;18 -8];        
         
         %translating H
-        %MBRcorners.cells(:,1) = [-30;25]; %x coordinates
-        %MBRcorners.cells(:,2) = [-30;25]; %y coordinates
+        MBRcorners.cells(:,1) = [-30;25]; %x coordinates
+        MBRcorners.cells(:,2) = [-30;25]; %y coordinates
 
-        %MBRcorners.nocells = [-18 8;13 30;...
-        %  -12 -30;13 -5];
+        MBRcorners.nocells = [-18 8;13 30;...
+          -12 -30;13 -5];
         
         %%  Meters to micrometers
         %MBRcorners.cells = MBRcorners.cells*10^-6;

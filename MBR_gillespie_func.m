@@ -92,7 +92,7 @@ else
     numcell = length(MBRstate.cellposn);
 end
 % initial chem state:
-cellstate = repmat(init,[1,1,numcell]); %cellstate(timeidx,chem,cell)
+cellstate = repmat(init,[simIterations,1,numcell]); %cellstate(timeidx,chem,cell)
 % matrix storing the time of next rxn in row 1 and rxn number in row 2
 nextRxnTime = zeros(2,numcell);
 
@@ -263,8 +263,10 @@ for i = 2:simIterations
     dydt_f = 1/kt*(-p*sum(Fnow.*sind(th)) - q*sum(Fnow.*edgecell.*cosd(th))); %mbr frame
       
     numtumblecells = sum(Fnow==0);
+    Fnow = ones(length(Fnow),1);
     dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p + by.*Fnow.*cosd(th)*p + q*Fnow.*edgecell.*(-bx.*cosd(th) + by.*sind(th))) + tumbleconstant*numtumblecells);
-    
+    dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th) + by.*Fnow.*cosd(th))*p + q*sum(Fnow.*edgecell.*(-bx.*cosd(th) + by.*sind(th))) + tumbleconstant*numtumblecells);
+
     %fprintf('Before: xbody: %8.8f ybody: %8.8f thbody: %8.6f \n',dxdt_f,dydt_f,dadt_f)
     %keyboard
       
@@ -316,6 +318,7 @@ MBRstate.posn(:,1:2) = MBRstate.posn(:,1:2)*10^6;
 
 
 %% Compute deterministic model and save in MBRstate.detPosn
+keyboard
 [MBRx,MBRy,MBRth,timeaxis] = runDeterministicModel(kt,kr,p,q,MBRstate.cellposn,edgecell,MBRstate.posn(1,:));
 MBRstate.detTime = timeaxis;
 MBRstate.detPosn = [MBRx' MBRy' MBRth'];

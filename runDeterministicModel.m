@@ -17,7 +17,7 @@ plotOption = false;
 %System : 50um x 100um, B1 = 13.03um/(s pN), B2 = -43.64um/(s pN),
 %B3 = 1.24 (rad/s pN)
 % determine time variables
-time = 15000;
+time = 10000;
 timestep = 1/1000;
 
 % unpack inputs
@@ -74,6 +74,7 @@ for i = 1:time
     xdot = (pbar *B1+qbar*G1)*cosd(r1(3)) - (pbar*B2+qbar*G2)*sind(r1(3));
     ydot = (pbar *B1+qbar*G1)*sind(r1(3)) + (pbar*B2+qbar*G2)*cosd(r1(3));
     phidot = pbar*B3 + qbar*G3;
+    disp('Deterministic')
     %fprintf('xbody: %8.8f ybody: %8.8f phibody: %8.8f \n',xbody,ybody,phidot)
     %keyboard
     
