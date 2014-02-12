@@ -1,14 +1,20 @@
 % Solve least squares for translating case
 
 load('HtransdxdyBody.mat')
+%load('H2TrackStat.mat')
 % dxdyBody
 % [ dx/dt dy/dt] in um/s
 % bodyTheta (in deg)
 
 fps = 5;
 
+scaleVelocity = 1e9;
+
 dtheta = -diff(bodyTheta)*fps; %deg/s flip into
-dxdyBody = dxdyBody * fps * 10^-6; % um/s -> m/s (not um/frame)
+dxdyBody = dxdyBody * fps * 10^-6 * scaleVelocity; % um/s -> m/s (not um/frame)
+
+dxdyBody(:,1) = smooth(dxdyBody(:,1),3,'lowess');
+dxdyBody(:,2) = smooth(dxdyBody(:,2),3,'lowess');
 
 nFrames = length(dtheta);
 
@@ -29,7 +35,7 @@ xlabel('frame')
 % check traj
 worldX = cumsum(dxdyBody(:,1));
 worldY = cumsum(dxdyBody(:,2));
-worldTheta = cumsum(bodyTheta);
+worldTheta = (bodyTheta);
 trajfromvh = figure;
 subplot(1,2,1)
 plot(worldX,worldY,'.b')
@@ -121,7 +127,6 @@ G1 = kt * sum(edgecell.*sind(th));
 G2 = - kt * sum(edgecell.*cosd(th));
 G3 = kr * sum(-edgecell.*bx.*cosd(th) + edgecell.*by.*sind(th));
 
-
 Arowspq = zeros(3,2);
 
 % sum cos(th)
@@ -142,6 +147,9 @@ Arowspq(3,1) = kr*sum(bx.*sind(th) + by.*cosd(th));
 % sum b*sin(th)
 Arowspq(3,2) = kr*sum(edgecell.*(-bx.*cosd(th) + by.*sind(th)));
 
+% scale velocity:
+Arowspq(1:2,:) = Arowspq(1:2,:)*scaleVelocity;
+
 Apq = repmat(Arowspq,[nFrames 1]);
 
 disp('Translation Analysis PQ')
@@ -156,10 +164,11 @@ disp('runDeterministicModel')
 
 [MBRx,MBRy,MBRth,timeaxis] = runDeterministicModel(1/kt,1/kr,xpq(1),xpq(2),cellposn,edgecell,[0;0;60]');
 %[MBRx,MBRy,MBRth,timeaxis] = runDeterministicModel(1/kt,1/kr,xpqNoTheta(1),xpqNoTheta(2),cellposn,edgecell,[0;0;60]');
-
+MBRx  = MBRx* 10^6; 
+MBRy  = MBRy* 10^6;
 
 % plot to check
-HtransCompare(MBRx,MBRy,MBRth,timeaxis)
+HtransCompare(MBRx,MBRy,MBRth,timeaxis,'det')
 
 
 %%

@@ -3,8 +3,9 @@ function [MBRx,MBRy,MBRth,timeaxis] = runDeterministicModel(kt_input,kr_input,ru
 % inputs
 
 % outputs
+% MBRx in meters/s
 
-% Take reciprocal.
+%% Take reciprocal.
 kt = 1/kt_input;
 kr = 1/kr_input;
 
@@ -17,7 +18,7 @@ plotOption = false;
 %System : 50um x 100um, B1 = 13.03um/(s pN), B2 = -43.64um/(s pN),
 %B3 = 1.24 (rad/s pN)
 % determine time variables
-time = 10000;
+time = 71000/5; 
 timestep = 1/1000;
 
 % unpack inputs

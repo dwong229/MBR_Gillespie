@@ -2,12 +2,12 @@
 clear
 close all
 %%%%%%%%
-simMode = 5; %1: one simulation, 2: repetition
+simMode = 6; %1: one simulation, 2: repetition
 % 6: repetition of 4
 %%%%%%%%
-repeatSim = 5;
+repeatSim = 20;
 
-simIterations = 5000;%5000;
+simIterations = 15000;%5000;
 
 %% simulation parameters
 delta = 0; % A -> I   reduced ligand detected
@@ -321,7 +321,7 @@ switch simMode
         
         % run a expt compare file
         %H3compare
-        HtransCompare(x,y,th,timeVec)
+        HtransCompare(x,y,th,timeVec,'sim')
         
         
         

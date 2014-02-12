@@ -68,8 +68,8 @@ q = -.8258e-12;
 p =   0.5070e-14;
 q =  -0.6292e-14;
 
-p = 0.5701e-8;
-q = 0.0941e-8;
+p = 0.5660e-14;
+q = 0.2688e-14;
 
 %p = .4804e-12;
 %q = -.8258e-12;
@@ -263,7 +263,7 @@ for i = 2:simIterations
     dydt_f = 1/kt*(-p*sum(Fnow.*sind(th)) - q*sum(Fnow.*edgecell.*cosd(th))); %mbr frame
       
     numtumblecells = sum(Fnow==0);
-    Fnow = ones(length(Fnow),1);
+    %Fnow = ones(length(Fnow),1);
     dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th)*p + by.*Fnow.*cosd(th)*p + q*Fnow.*edgecell.*(-bx.*cosd(th) + by.*sind(th))) + tumbleconstant*numtumblecells);
     dadt_f = 1/kr*(sum(bx.*Fnow.*sind(th) + by.*Fnow.*cosd(th))*p + q*sum(Fnow.*edgecell.*(-bx.*cosd(th) + by.*sind(th))) + tumbleconstant*numtumblecells);
 
@@ -314,11 +314,11 @@ for i = 2:simIterations
 end
 
 % convert m to um
-MBRstate.posn(:,1:2) = MBRstate.posn(:,1:2)*10^6;
+MBRstate.posn(:,1:2) = MBRstate.posn(:,1:2)*10^6; 
 
 
 %% Compute deterministic model and save in MBRstate.detPosn
-keyboard
+
 [MBRx,MBRy,MBRth,timeaxis] = runDeterministicModel(kt,kr,p,q,MBRstate.cellposn,edgecell,MBRstate.posn(1,:));
 MBRstate.detTime = timeaxis;
 MBRstate.detPosn = [MBRx' MBRy' MBRth'];
