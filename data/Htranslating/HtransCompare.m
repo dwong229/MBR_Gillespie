@@ -47,5 +47,3 @@ legend('Experiment','Simulation')
 ylabel('Orientation (deg)')
 xlabel('Time (sec')
 
-% Comparison to non-stochastic results
-

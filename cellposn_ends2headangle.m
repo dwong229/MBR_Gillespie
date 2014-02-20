@@ -106,7 +106,7 @@ elseif datafile == 'H3'
     LLCorner = [40 62];
     LRCorner = [471 33];
     %MBRangle = rad2deg(atan2(33-62,471-40))
-    MBRangle = -2;
+    MBRangle = -30;
     pix2mic = 494/60; % pixels per 60um
     
     % just rotating without moving coordinates is not quite correct...

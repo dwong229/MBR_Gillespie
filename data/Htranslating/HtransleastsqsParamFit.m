@@ -7,11 +7,14 @@ load('HtransdxdyBody.mat')
 % bodyTheta (in deg)
 
 fps = 5;
+timeVecTrack = 1/5*[0:length(dxdyBody)-1];
+rawdxdyBody = dxdyBody;
 
-scaleVelocity = 1e9;
+scaleVelocity = 1;
+
 
 dtheta = -diff(bodyTheta)*fps; %deg/s flip into
-dxdyBody = dxdyBody * fps * 10^-6 * scaleVelocity; % um/s -> m/s (not um/frame)
+dxdyBody = dxdyBody * fps * 10e-6* scaleVelocity; % um/s -> m/s (not um/frame)
 
 dxdyBody(:,1) = smooth(dxdyBody(:,1),3,'lowess');
 dxdyBody(:,2) = smooth(dxdyBody(:,2),3,'lowess');
@@ -22,19 +25,20 @@ nFrames = length(dtheta);
 % What we are trying to fit
 vh = figure;
 subplot(3,1,1)
-plot(dxdyBody(:,1),'.b')
+plot(timeVecTrack,rawdxdyBody(:,1),'.r')
 ylabel('X velocity (body frame)')
 subplot(3,1,2)
-plot(dxdyBody(:,2),'.b')
+plot(timeVecTrack,rawdxdyBody(:,2),'.r')
 ylabel('Y velocity (body frame)')
 subplot(3,1,3)
-plot(bodyTheta)
+%plot([timeVecTrack,timeVecTrack(end)+1/fps] ,bodyTheta,'.r')
+plot(timeVecTrack,diff(bodyTheta),'.r')
 ylabel('Angular Velocity')
-xlabel('frame')
+xlabel('time')
 
 % check traj
-worldX = cumsum(dxdyBody(:,1));
-worldY = cumsum(dxdyBody(:,2));
+worldX = cumsum(rawdxdyBody(:,1));
+worldY = cumsum(rawdxdyBody(:,2));
 worldTheta = (bodyTheta);
 trajfromvh = figure;
 subplot(1,2,1)
@@ -45,9 +49,6 @@ subplot(1,2,2)
 plot(worldTheta,'.b')
 ylabel('Orientation')
 xlabel('frame')
-
-
-
 
 temp = [dxdyBody dtheta'];
 tempT = temp';
@@ -152,9 +153,11 @@ Arowspq(1:2,:) = Arowspq(1:2,:)*scaleVelocity;
 
 Apq = repmat(Arowspq,[nFrames 1]);
 
+
 disp('Translation Analysis PQ')
 xpq = Apq\B
-
+%xpq = Apq(:,1)\B
+%xpq = [xpq;0]
 %%%%%%%%%
 Atrans = A;
 Btrans = B;
@@ -164,12 +167,25 @@ disp('runDeterministicModel')
 
 [MBRx,MBRy,MBRth,timeaxis] = runDeterministicModel(1/kt,1/kr,xpq(1),xpq(2),cellposn,edgecell,[0;0;60]');
 %[MBRx,MBRy,MBRth,timeaxis] = runDeterministicModel(1/kt,1/kr,xpqNoTheta(1),xpqNoTheta(2),cellposn,edgecell,[0;0;60]');
-MBRx  = MBRx* 10^6; 
+MBRx  = MBRx* 10^6;
 MBRy  = MBRy* 10^6;
 
 % plot to check
 HtransCompare(MBRx,MBRy,MBRth,timeaxis,'det')
 
+%% plot to compare body velocity:
+simV = Apq*xpq;
+
+figure(vh)
+subplot(3,1,1)
+hold on
+plot([0,timeVecTrack(end)],simV(1)*[1,1],'-b')
+subplot(3,1,2)
+hold on
+plot([0,timeVecTrack(end)],simV(2)*[1,1],'-b')
+subplot(3,1,3)
+hold on
+plot([0,timeVecTrack(end)],simV(3)*[1,1],'-b')
 
 %%
 disp('Dont run rotation')
