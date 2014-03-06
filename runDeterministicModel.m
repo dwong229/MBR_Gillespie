@@ -1,4 +1,4 @@
-function [MBRx,MBRy,MBRth,timeaxis] = runDeterministicModel(kt_input,kr_input,runforce,sideforce,cellposn,edgecell,initialposn)
+function [MBRx,MBRy,MBRth,timeaxis,dxdt_body] = runDeterministicModel(kt_input,kr_input,runforce,sideforce,cellposn,edgecell,initialposn)
 
 % inputs
 
@@ -86,6 +86,8 @@ for i = 1:time
     rhistory(:,i) = r2;
     r1 = r2;
 end
+
+dxdt_body = [xbody;ybody;phidot]; % velocity in body frame
 
 timeaxis = timestep*[1:time];
 
