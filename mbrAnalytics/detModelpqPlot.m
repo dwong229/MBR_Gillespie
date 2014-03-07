@@ -64,37 +64,19 @@ dthdt = zeros(1,pres*qres);
 dxdt = zeros(1,pres*qres);
 dydt = zeros(1,pres*qres);
 
-plotIdx = 0;
-for pIdx = 1:length(pVec)
-    p = pVec(pIdx);
-    for qIdx = 1:length(qVec)
-        plotIdx = plotIdx + 1;
-        q = qVec(qIdx);
-        
-        % run deterministic sim
-        [~,~,~,~,dxdt_body] = runDeterministicModel(1/invkt,1/invkr,p,q,cellposn,edgecell,[0;0;0]');
-        % returns in m
-        
-        % unpack velocities
-        dxdt(plotIdx) = dxdt_body(1) * 1e6;
-        dydt(plotIdx) = dxdt_body(2) * 1e6;
-        dthdt(plotIdx) = dxdt_body(3);
-        
-        % assign plot axes
-        pplot(plotIdx) = p;
-        qplot(plotIdx) = q;
-    end
-end
+% compute velocities
+[dxdt,dydt,dthdt,pplot,qplot] = UpdateVelcityDetModel(pVec,qVec);
 
+%% Make initial plots
 StartIdx = floor(length(pplot)/2);
 
 h1 = figure('Position',[113 302 1484 505]);
 subplot(1,2,1)
-plot3(pplot,qplot,dxdt,'.r')
+xvelplot = plot3(pplot,qplot,dxdt,'.r');
 hold on
-plot3(pplot,qplot,dydt,'.b')
-dxcircle = plot3(pplot(StartIdx),qplot(StartIdx),dxdt(StartIdx),'or');
-dycircle = plot3(pplot(StartIdx),qplot(StartIdx),dydt(StartIdx),'ob');
+yvelplot = plot3(pplot,qplot,dydt,'.b');
+dxcircle = plot3(pplot(StartIdx),qplot(StartIdx),dxdt(StartIdx),'xk','MarkerSize',8);
+dycircle = plot3(pplot(StartIdx),qplot(StartIdx),dydt(StartIdx),'xk','MarkerSize',8);
 legend('dxdt','dydt','Location','NorthWest')
 axis square
 title(strcat(plotstr,': linear velocity'))
@@ -103,10 +85,10 @@ ylabel('q-force (N)')
 zlabel('velocity (um/s)')
 
 subplot(1,2,2)
-plot3(pplot,qplot,dthdt,'.b')
+thvelplot = plot3(pplot,qplot,dthdt,'.b');
 % Add plot gui
 hold on
-dthcircle = plot3(pplot(StartIdx),qplot(StartIdx),dthdt(StartIdx),'oc');
+dthcircle = plot3(pplot(StartIdx),qplot(StartIdx),dthdt(StartIdx),'xk','MarkerSize',8);
 axis square
 title('angular velocity')
 xlabel('p-force (N)')
@@ -114,20 +96,53 @@ ylabel('q-force (N)')
 zlabel('angular velcity (deg/s)')
 p = pplot(floor(length(pplot)/2));
 q = qplot(floor(length(pplot)/2));
-%% slider!
+
+%% p and q force text
+ptext = uicontrol('Style','text',...
+        'Position',[650 445 240 20],...
+        'String',strcat('Select force p: ',num2str(p*1e-12),'pN'));
+qtext = uicontrol('Style','text',...
+        'Position',[650 390 240 20],...
+        'String',strcat('Select force q: ',num2str(q*1e-12),'pN'));
+    
+%% slider!    
 uicontrol('Style', 'slider',...
         'Min',0,'Max',100,'Value',50,...
         'Position', [650 420 240 20],...
-        'Callback', {@PlotSlider_Callback,dxcircle,dycircle,dthcircle});
+        'Callback', {@PlotSlider_Callback,dxcircle,dycircle,dthcircle,ptext});
     
-uicontrol('Style','text',...
-        'Position',[650 445 240 20],...
-        'String','Select force p')
-
 uicontrol('Style', 'slider',...
         'Min',0,'Max',100,'Value',50,...
         'Position', [650 365 240 20],...
-        'Callback', {@QPlotSlider_Callback,dxcircle,dycircle,dthcircle});
-uicontrol('Style','text',...
-        'Position',[650 390 240 20],...
-        'String','Select force q')
+        'Callback', {@QPlotSlider_Callback,dxcircle,dycircle,dthcircle,qtext});
+    
+%% drag
+
+% update kr + kt
+%invkr = 1/1.0766e-11; % 1/kr
+%invkt = 1/1.5e-6; % 1/kt
+%% slider! 
+%% p and q force text
+krtext = uicontrol('Style','text',...
+        'Position',[650 325 240 20],...
+        'String',strcat('Select drag inv(kr): ',num2str(invkt,6),'m/Ns'));
+kttext = uicontrol('Style','text',...
+        'Position',[650 270 240 20],...
+        'String',strcat('Select drag inv(kt): ',num2str(invkr,6),'m/Ns'));
+
+uicontrol('Style', 'slider',...
+        'Min',0,'Max',100,'Value',50,...
+        'Position', [650 310 240 20],...
+        'Callback', {@dragSlider_Callback,'r',krtext});
+    
+uicontrol('Style', 'slider',...
+        'Min',0,'Max',100,'Value',50,...
+        'Position', [650 255 240 20],...
+        'Callback', {@dragSlider_Callback,'t',kttext});
+
+
+keyboard
+%invkr = invkr/2;
+%invkt = invkt/2;
+% update plots
+UpdateVelcityDetModel(pVec,qVec,xvelplot,yvelplot,thvelplot);

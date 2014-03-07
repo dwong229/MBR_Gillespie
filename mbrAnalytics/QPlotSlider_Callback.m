@@ -1,4 +1,4 @@
-function QPlotSlider_Callback(hObject,event,dxcircle,dycircle,dthcircle)
+function QPlotSlider_Callback(hObject,event,dxcircle,dycircle,dthcircle,qtext)
 
 global invkt invkr cellposn edgecell qmin qmax p q
 
@@ -33,3 +33,6 @@ qpN = q*10^12;
 fprintf('Forces p:%2.5f pN q:%2.5f pN \n',ppN,qpN)
 fprintf('Velocity\nx:%2.3f um/s \ny:%2.3f um/s \nth:%2.3f deg/s \n',dxdt,dydt,dthdt)
 disp('--')
+
+% update ptext:
+set(qtext,'String',strcat('Select force p: ',num2str(qpN),'pN'))

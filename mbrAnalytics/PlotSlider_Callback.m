@@ -1,4 +1,4 @@
-function PlotSlider_Callback(hObject,event,dxcircle,dycircle,dthcircle)
+function PlotSlider_Callback(hObject,event,dxcircle,dycircle,dthcircle,ptext)
 
 global invkt invkr cellposn edgecell pmin pmax p q
 
@@ -34,3 +34,6 @@ qpN = q*10^12;
 fprintf('Forces p:%2.3f pN q:%2.3f pN \n',ppN,qpN)
 fprintf('Velocity\nx:%2.3f um/s \ny:%2.3f um/s \nth:%2.3f deg/s \n',dxdt,dydt,dthdt)
 disp('--')
+
+% update ptext:
+set(ptext,'String',strcat('Select force p: ',num2str(ppN),'pN'))
