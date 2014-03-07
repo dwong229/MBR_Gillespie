@@ -1,8 +1,9 @@
 % Run simulation for multiple p,q and dtermine
+close all
 
-
+global invkt invkr cellposn edgecell pmin pmax qmin qmax p q
 %% cell dist option
-mbrcelloption = 2;
+mbrcelloption = 1;
 
 %% Load MBR cell info
 % drag coeff
@@ -42,7 +43,7 @@ celllength = 10;
 
 %% Input force range to test
 pmin = 1e-15;
-pmax = 1e-13;
+pmax = 1e-12;
 pres = 10;
 
 qmin = -1e-13;
@@ -85,22 +86,48 @@ for pIdx = 1:length(pVec)
     end
 end
 
-figure
+StartIdx = floor(length(pplot)/2);
+
+h1 = figure('Position',[113 302 1484 505]);
+subplot(1,2,1)
 plot3(pplot,qplot,dxdt,'.r')
 hold on
 plot3(pplot,qplot,dydt,'.b')
-legend('dxdt','dydt')
-title(plotstr)
+dxcircle = plot3(pplot(StartIdx),qplot(StartIdx),dxdt(StartIdx),'or');
+dycircle = plot3(pplot(StartIdx),qplot(StartIdx),dydt(StartIdx),'ob');
+legend('dxdt','dydt','Location','NorthWest')
+axis square
+title(strcat(plotstr,': linear velocity'))
 xlabel('p-force (N)')
 ylabel('q-force (N)')
 zlabel('velocity (um/s)')
 
-figure
+subplot(1,2,2)
 plot3(pplot,qplot,dthdt,'.b')
 % Add plot gui
-
-title(plotstr)
+hold on
+dthcircle = plot3(pplot(StartIdx),qplot(StartIdx),dthdt(StartIdx),'oc');
+axis square
+title('angular velocity')
 xlabel('p-force (N)')
 ylabel('q-force (N)')
 zlabel('angular velcity (deg/s)')
+p = pplot(floor(length(pplot)/2));
+q = qplot(floor(length(pplot)/2));
+%% slider!
+uicontrol('Style', 'slider',...
+        'Min',0,'Max',100,'Value',50,...
+        'Position', [650 420 240 20],...
+        'Callback', {@PlotSlider_Callback,dxcircle,dycircle,dthcircle});
+    
+uicontrol('Style','text',...
+        'Position',[650 445 240 20],...
+        'String','Select force p')
 
+uicontrol('Style', 'slider',...
+        'Min',0,'Max',100,'Value',50,...
+        'Position', [650 365 240 20],...
+        'Callback', {@QPlotSlider_Callback,dxcircle,dycircle,dthcircle});
+uicontrol('Style','text',...
+        'Position',[650 390 240 20],...
+        'String','Select force q')

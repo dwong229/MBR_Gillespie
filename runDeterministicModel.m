@@ -18,8 +18,12 @@ plotOption = false;
 %System : 50um x 100um, B1 = 13.03um/(s pN), B2 = -43.64um/(s pN),
 %B3 = 1.24 (rad/s pN)
 % determine time variables
-time = 71000/5; 
-timestep = 1/1000;
+time = 2;
+timestep =1;
+
+
+%time = 71000/5; 
+%timestep = 1/1000;
 
 % unpack inputs
 pbar = 10/11*runforce;

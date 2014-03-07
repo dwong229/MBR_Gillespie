@@ -26,15 +26,18 @@ nFrames = length(dtheta);
 vh = figure;
 subplot(3,1,1)
 plot(timeVecTrack,rawdxdyBody(:,1),'.r')
-ylabel('X velocity (body frame)')
+ylabel('X velocity (um/s)')
+title('Velocity in the body frame coord [rot]')
 subplot(3,1,2)
 plot(timeVecTrack,rawdxdyBody(:,2),'.r')
-ylabel('Y velocity (body frame)')
+ylabel('Y velocity (um/s)')
 subplot(3,1,3)
 %plot([timeVecTrack,timeVecTrack(end)+1/fps] ,bodyTheta,'.r')
 plot(timeVecTrack,diff(bodyTheta),'.r')
-ylabel('Angular Velocity')
-xlabel('time')
+ylabel('Angular Velocity (deg/s)')
+xlabel('time (s)')
+
+keyboard
 
 % check traj
 worldX = cumsum(rawdxdyBody(:,1));
