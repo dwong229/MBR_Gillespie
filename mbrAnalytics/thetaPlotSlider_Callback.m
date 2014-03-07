@@ -1,6 +1,11 @@
 function PlotSlider_Callback(hObject,event,dxcircle,dycircle,dthcircle,q)
 
-% take slider value for p and update theta plot
+% take slider value for p and update htheta plot location of circle
+% INPUT
+% hObject: plot3(x,y,dthdt), circle around point (x,y,dthdt)
+% pplot,qplot,dthdt 
+% 
+
 
 slider_value = round(get(hObject,'Value'));
 
