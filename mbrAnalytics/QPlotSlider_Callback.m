@@ -27,12 +27,16 @@ set(dycircle,'XData',p,'YData',q,'ZData',dydt)
 % circle [p,q,dthdt]
 set(dthcircle,'XData',p,'YData',q,'ZData',dthdt)
 
+%% plot display
 ppN = p*10^12;
 qpN = q*10^12;
 
-fprintf('Forces p:%2.5f pN q:%2.5f pN \n',ppN,qpN)
+fprintf('Forces q:%2.5f pN q:%2.5f pN \n',ppN,qpN)
 fprintf('Velocity\nx:%2.3f um/s \ny:%2.3f um/s \nth:%2.3f deg/s \n',dxdt,dydt,dthdt)
 disp('--')
 
 % update ptext:
-set(qtext,'String',strcat('Select force p: ',num2str(qpN),'pN'))
+set(qtext,'String',strcat('Select force p: ',num2str(qpN,3),'pN'))
+
+%% Update mbr Vector plot:
+updateVector(dxdt,dydt,dthdt)

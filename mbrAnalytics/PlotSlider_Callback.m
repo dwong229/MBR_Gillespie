@@ -36,4 +36,6 @@ fprintf('Velocity\nx:%2.3f um/s \ny:%2.3f um/s \nth:%2.3f deg/s \n',dxdt,dydt,dt
 disp('--')
 
 % update ptext:
-set(ptext,'String',strcat('Select force p: ',num2str(ppN),'pN'))
+set(ptext,'String',strcat('Select force p: ',num2str(ppN,3),'pN'))
+%% Update mbr Vector plot:
+updateVector(dxdt,dydt,dthdt)

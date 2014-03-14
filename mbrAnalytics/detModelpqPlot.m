@@ -1,7 +1,7 @@
 % Run simulation for multiple p,q and dtermine
 close all
-
-global invkt invkr cellposn edgecell pmin pmax qmin qmax p q
+clear all
+global invkt invkr cellposn edgecell pmin pmax qmin qmax p q krmin krmax ktmin ktmax pVec qVec vvector thvector
 %% cell dist option
 mbrcelloption = 1;
 
@@ -34,13 +34,6 @@ celllength = 10;
 [edgecell,~,~] = find_edge_bacteria(MBRcorners.cells,MBRcorners.nocells,cellposn,celllength);
 
 
-
-% rotating H
-
-celllength = 10;
-[edgecell,~,~] = find_edge_bacteria(MBRcorners.cells,MBRcorners.nocells,cellposn,celllength);
-
-
 %% Input force range to test
 pmin = 1e-15;
 pmax = 1e-12;
@@ -49,6 +42,11 @@ pres = 10;
 qmin = -1e-13;
 qmax = 1e-13;
 qres = 10;
+
+krmin = 0; %0.1*(1/invkr);
+krmax = 2*(1/invkr);
+ktmin = 0; %0.1*(1/invkr);
+ktmax = 2*(1/invkt);
 
 %% set up vectors of p and q force to cycle through
 pdiff = pmax - pmin;
@@ -70,7 +68,7 @@ dydt = zeros(1,pres*qres);
 %% Make initial plots
 StartIdx = floor(length(pplot)/2);
 
-h1 = figure('Position',[113 302 1484 505]);
+h1 = figure('Position',[113 302 1526 505]);
 subplot(1,2,1)
 xvelplot = plot3(pplot,qplot,dxdt,'.r');
 hold on
@@ -97,6 +95,28 @@ zlabel('angular velcity (deg/s)')
 p = pplot(floor(length(pplot)/2));
 q = qplot(floor(length(pplot)/2));
 
+%% Make MBR plot
+
+mbrplot = figure('Position',[1267,2,560,420])
+plot([-20,20,20,-20,-20],[-20,-20,20,20,-20],'-k') % sq robot
+axis([-40 40 -40 40])
+axis equal
+xlabel('X')
+ylabel('Y')
+title('Velocity Vectors')
+vx = get(dxcircle,'ZData');
+vy = get(dycircle,'ZData');
+th = get(dthcircle,'ZData');
+
+%normv = [vx vy]/norm([vx vy]);
+normv = [vx vy]/10;
+
+hold on
+%arrowscale = 15;
+vvector = quiver(0,0,normv(1),normv(2),'MarkerSize',10,'MaxHeadSize',1);
+thvector = quiver(22,0,0,th,'MarkerSize',10,'MaxHeadSize',10);
+
+figure(h1)
 %% p and q force text
 ptext = uicontrol('Style','text',...
         'Position',[650 445 240 20],...
@@ -105,7 +125,7 @@ qtext = uicontrol('Style','text',...
         'Position',[650 390 240 20],...
         'String',strcat('Select force q: ',num2str(q*1e-12),'pN'));
     
-%% slider!    
+%% FORCE slider!    
 uicontrol('Style', 'slider',...
         'Min',0,'Max',100,'Value',50,...
         'Position', [650 420 240 20],...
@@ -121,8 +141,8 @@ uicontrol('Style', 'slider',...
 % update kr + kt
 %invkr = 1/1.0766e-11; % 1/kr
 %invkt = 1/1.5e-6; % 1/kt
-%% slider! 
-%% p and q force text
+%% DRAG sliders! 
+%% krkt text
 krtext = uicontrol('Style','text',...
         'Position',[650 325 240 20],...
         'String',strcat('Select drag inv(kr): ',num2str(invkt,6),'m/Ns'));
@@ -133,16 +153,9 @@ kttext = uicontrol('Style','text',...
 uicontrol('Style', 'slider',...
         'Min',0,'Max',100,'Value',50,...
         'Position', [650 310 240 20],...
-        'Callback', {@dragSlider_Callback,'r',krtext});
+        'Callback', {@dragSlider_Callback,'r',krtext,xvelplot,yvelplot,thvelplot,dxcircle,dycircle,dthcircle});
     
 uicontrol('Style', 'slider',...
         'Min',0,'Max',100,'Value',50,...
         'Position', [650 255 240 20],...
-        'Callback', {@dragSlider_Callback,'t',kttext});
-
-
-keyboard
-%invkr = invkr/2;
-%invkt = invkt/2;
-% update plots
-UpdateVelcityDetModel(pVec,qVec,xvelplot,yvelplot,thvelplot);
+        'Callback', {@dragSlider_Callback,'t',kttext,xvelplot,yvelplot,thvelplot,dxcircle,dycircle,dthcircle});
