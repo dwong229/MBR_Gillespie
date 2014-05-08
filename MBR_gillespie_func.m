@@ -15,11 +15,20 @@ function [timeVec,MBRstate]= MBR_gillespie_func(rxnrate,init,simIterations,attra
 
 %MBRstate = struct('posn',[0 0 360*rand(1)],'cellposn',[],'F',[]); %in fixed/world frame
 %MBRstate = struct('posn',[0 0 90-9],'cellposn',[],'F',[]); %in fixed/world frame
-MBRstate = struct('posn',[0 0 60],'cellposn',[],'F',[]); %in fixed/world frame
+
+if isstruct(init)
+    MBRstate = struct('posn',init.dyn,'cellposn',[],'F',[]); %in fixed/world frame
+    init = init.chem;
+else
+    MBRstate = struct('posn',[0 0 60],'cellposn',[],'F',[]); %in fixed/world frame
+end
 
 % varargin for cell distribution provided
 if nargin == 6 && ~isempty(varargin{1})
     MBRstate.cellposn = varargin{1};
+    
+%elseif nargin == 7
+    %MBRstate.cellposn = varargin{1};
     
 else
     MBRstate.cellposn = [];
@@ -315,6 +324,7 @@ end
 
 % convert m to um
 MBRstate.posn(:,1:2) = MBRstate.posn(:,1:2)*10^6; 
+
 
 
 %% Compute deterministic model and save in MBRstate.detPosn
