@@ -2,7 +2,7 @@
 clear
 close all
 %%%%%%%%
-simMode = 1; %1: one simulation, 2: repetition
+simMode = 5; %1: one simulation, 2: repetition
 % 6: repetition of 4
 %%%%%%%%
 repeatSim = 20;
@@ -293,7 +293,8 @@ switch simMode
         %---- Compare with deterministic model ----
         keyboard
         EndTimeIdx = find(timeVec(end)>state.detTime,1,'last') + 1;
-        timeaxis = state.detTime(1:EndTimeIdx);
+        %timeaxis = state.detTime(1:EndTimeIdx);
+        timeaxis = timeVec(1:EndTimeIdx);
         xDet = state.detPosn(1:EndTimeIdx,1)*10^6;
         yDet = state.detPosn(1:EndTimeIdx,2)*10^6;
         thDet = state.detPosn(1:EndTimeIdx,3);

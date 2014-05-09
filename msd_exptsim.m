@@ -2,9 +2,14 @@
 % User: - sets rotation or translation
 %       - tau: seconds between each posn update with
 
+clear
+close all
+clc 
+
 %% USER INPUTS
 transRot = 1; % 1: translation, 2: rotation
 tau = 2; % amt of time to simulate between updating from expt data
+frame2sec = 2; % frames per second
 
 %% Load appropriate files for translation or rotation mode
 if transRot == 1
@@ -43,32 +48,65 @@ else
 end
 
 load(cellposnfile)
+exptTime = 1/frame2sec*[0:length(th)-1];
 
 %% Start simulation
 
-frame2sec = 2; % frames per second
+h1 = figure('Position',[67 420 1338 537]);
 
-exptTime = frame2sec*[0:length(th)-1];
+subplot(1,2,1)
+xysimplot = plot([0 1],[0 1],'-b');
+hold on
+%set(xyrealplot,'XData',xy(1:closestIdx,1),'YData',xy(1:closestIdx,2))
 
+xyrealplot = plot(xy(:,1)*1e6,xy(:,2)*1e6,'or');
+title('MBR position MSD sim with expt updates')
+xlabel('X Position (um)')
+ylabel('Y Position (um)')
+%legend('x','y')
+%xlim([0 ceil(timeVec(end))])
+%axis equal
+
+subplot(1,2,2)
+orientsimplot = plot(0,0,'-b');
+hold on
+orientrealplot = plot(0,0,'or');
+xlabel('Time (s)')
+ylabel('Orientation (deg)')
+axis([0,ceil(exptTime(end)),0,360])
+
+simTime = [];
 simTimeLast = 0;
-% simulate
-while simTime < exptTime(end)
+mbrState = struct('posn',[],'cellposn',[],'F',[],'cellAngle',[],'detTime',[],'detPosn',[]);% simulate
+while simTimeLast < exptTime(end)
     
-    [~, closestIdx] = min(abs(exptTime - simTime));
+    [~, closestIdx] = find(exptTime>simTimeLast,1,'first');
     % update mbr posn and orientation
     lastState = [xy(closestIdx,:) th(closestIdx)];
     
     % simulate for tau time
     [newTime,newmbrState] = wrapperMBRgillespiefunc(cellposn,MBRcorners,lastState,tau);
     
-    [~,newTimeLength] = min(abs(newTime - tau));
+    newTimeLength = find(newTime<tau,1,'last');
     
-    simTime = cat(simTime,newTime(1:newTimeLength)+simTimeLast);
-    mbrState = cat(1,mbrState,newmbrState);
-    
+    simTime = cat(2,simTime,newTime(1:newTimeLength)+exptTime(closestIdx));
+    mbrState.posn = cat(1,mbrState.posn,newmbrState.posn(1:newTimeLength,:));
     
     simTimeLast = simTime(end);
     
-    % plot update
+    %% plot update
+    %plot simulation
+    x = mbrState.posn(:,1);
+    y = mbrState.posn(:,2);
+    thSim = mbrState.posn(:,3);
+    
+    %subplot(2,1,1)
+    
+    set(xysimplot,'XData',x,'YData',y)
+    %set(xyrealplot,'XData',xy(1:closestIdx,1),'YData',xy(1:closestIdx,2))
+    set(orientsimplot,'XData',simTime,'YData',thSim)
+    set(orientrealplot,'XData',exptTime(1:closestIdx),'YData',th(1:closestIdx))
+    
     keyboard
 end
+
