@@ -74,6 +74,10 @@ q = FdragRot;  % trans
 p = .4804e-12;
 q = -.8258e-12;
 
+% for translating
+p = 5.701e-12;
+q = .942e-12;
+
 %p =   0.5070e-14;
 %q =  -0.6292e-14;
 
@@ -330,5 +334,9 @@ MBRstate.posn(:,1:2) = MBRstate.posn(:,1:2)*10^6;
 %% Compute deterministic model and save in MBRstate.detPosn
 
 [MBRx,MBRy,MBRth,timeaxis] = runDeterministicModel(kt,kr,p,q,MBRstate.cellposn,edgecell,MBRstate.posn(1,:));
+% convert from m to um.
+MBRx  = MBRx* 10^6;
+MBRy  = MBRy* 10^6;
+MBRth = MBRth - MBRth(1);
 MBRstate.detTime = timeaxis;
 MBRstate.detPosn = [MBRx' MBRy' MBRth'];

@@ -2,7 +2,7 @@
 clear
 close all
 %%%%%%%%
-simMode = 5; %1: one simulation, 2: repetition
+simMode = 6; %1: one simulation, 2: repetition
 % 6: repetition of 4
 %%%%%%%%
 repeatSim = 20;

@@ -9,7 +9,7 @@ function [MBRx,MBRy,MBRth,timeaxis,dxdt_body] = runDeterministicModel(kt_input,k
 kt = 1/kt_input;
 kr = 1/kr_input;
 
-plotOption = false;
+plotOption = true;
 
 %Simulation of Serratia Marcescens blotted on SU8 rectangular substrate
 %Based on Modeling, control and experimental characterization of
@@ -18,8 +18,8 @@ plotOption = false;
 %System : 50um x 100um, B1 = 13.03um/(s pN), B2 = -43.64um/(s pN),
 %B3 = 1.24 (rad/s pN)
 % determine time variables
-time = 2;
-timestep =1;
+time = 70; % Length of time vector
+timestep = 0.2; % seconds between each time value 0 - 1.
 
 
 %time = 71000/5; 
@@ -63,8 +63,8 @@ Arowspq(3,1) = kr*sum(bx.*sind(th) + by.*cosd(th));
 Arowspq(3,2) = -kr*sum(edgecell.*(bx.*cosd(th) + by.*sind(th)));
 
 Adeterministic = [Arowspq zeros(3,1)];
-
-for i = 1:time
+rhistory(:,1) = r1;
+for i = 2:time
     
     %dx = Adeterministic * r1;
     %xdot = dx(1);

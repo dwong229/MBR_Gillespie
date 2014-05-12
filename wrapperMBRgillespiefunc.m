@@ -3,7 +3,8 @@ function [timeVec,state] = wrapperMBRgillespiefunc(cellposn,MBRcorners,lastState
 % INPUT: 
 % 
 % OUTPUT: 
-% 
+% state: 
+% timeVec: 
 
 % Simulation parameters
 %% simulation parameters
@@ -59,6 +60,4 @@ while simTimeLongEnough
         simTimeLongEnough = false;
     end
     
-end
-
-        
+end     
