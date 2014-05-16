@@ -144,4 +144,8 @@ Apq = repmat(Arowspq,[nFrames 1]);
 
 
 disp('Translation Analysis PQ')
-xpqCompute = Apq\B
+xpqCompute = Apq\B;
+% multiply by 11/10 to correct for run:tumble
+xpqCompute = xpqCompute*11/10;
+
+

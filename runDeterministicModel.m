@@ -9,7 +9,7 @@ function [MBRx,MBRy,MBRth,timeaxis,dxdt_body] = runDeterministicModel(kt_input,k
 kt = 1/kt_input;
 kr = 1/kr_input;
 
-plotOption = true;
+plotOption = false;
 
 %Simulation of Serratia Marcescens blotted on SU8 rectangular substrate
 %Based on Modeling, control and experimental characterization of

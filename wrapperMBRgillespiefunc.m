@@ -39,6 +39,7 @@ Run = 1;
 init.chem = [I A AA AAp YY YYp Mot Run];
 
 % initialize posn
+lastState(1:2) = lastState(1:2) * 1e-6; % convert to m
 init.dyn = lastState; %start at [x,y,theta]
 
 attractant = @(x) 0;

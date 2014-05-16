@@ -70,14 +70,21 @@ kr = FdragRot*30/VdragRot % N um s/deg
 %% compute q force based on torque and number of edge cells
 q = FdragRot;  % trans
 
-% LEAST SQS P.Q
-p = .4804e-12;
-q = -.8258e-12;
+% LEAST SQS P.Q translating
+disp('Loading translating pq')
+p = .6454e-13;
+q = -.2476e-13;
 
-% for translating
-p = 5.701e-12;
-q = .942e-12;
+% rotation
+disp('Loading rotation pq')
+%p = .6119e-12;
+p = .65e-12;
+q = 0;
 
+kr = 1/9.295e10;
+kt = 1/3.333e5;
+p = .0809e-12;
+q = .006e-12;
 %p =   0.5070e-14;
 %q =  -0.6292e-14;
 
